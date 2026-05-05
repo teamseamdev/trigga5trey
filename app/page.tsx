@@ -18,6 +18,7 @@ export default async function Home() {
   );
 }
 
+/* 🔴 LIVE VIEW */
 function LiveView() {
   return (
     <section style={{ height: "100vh", position: "relative" }}>
@@ -28,8 +29,16 @@ function LiveView() {
       <div style={liveBadge}>LIVE</div>
 
       <div style={buttons}>
-        <a href="/shop" style={primaryBtn}>Shop Merch</a>
-        <a href="https://discord.gg/MVzzrFtUcR" target="_blank" style={secondaryBtn}>
+        <a href="/shop" style={primaryBtn}>
+          Shop Merch
+        </a>
+
+        <a
+          href="https://discord.gg/MVzzrFtUcR"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={secondaryBtn}
+        >
           Join Discord
         </a>
       </div>
@@ -37,31 +46,54 @@ function LiveView() {
   );
 }
 
+/* ⚫ OFFLINE HERO */
 function OfflineHero() {
   return (
     <section style={centered}>
       <div>
-        <h1>
-          WELCOME TO <span style={{ color: "#ff7a00" }}>THE FIVE</span>
+        <h1 style={headline}>
+          WELCOME TO{" "}
+          <span style={{ color: "#ff7a00" }}>THE FIVE</span>
         </h1>
 
-        <p style={{ opacity: 0.8 }}>Stream. Culture. Community.</p>
+        <p style={{ opacity: 0.8, marginBottom: "25px" }}>
+          Stream. Culture. Community.
+        </p>
 
-        <div style={{ marginTop: 20 }}>
-          <a href="/shop" style={primaryBtn}>Shop Collection</a>
+        {/* 🔥 FIXED BUTTON ROW */}
+        <div style={heroButtons}>
+          <a href="/shop" style={primaryBtn}>
+            Shop Collection
+          </a>
+
+          <a
+            href="https://discord.gg/MVzzrFtUcR"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={secondaryBtn}
+          >
+            Join Discord
+          </a>
         </div>
       </div>
     </section>
   );
 }
 
-/* styles */
+/* 🔥 STYLES */
+
 const centered = {
   height: "100vh",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   textAlign: "center" as const,
+  padding: "0 20px",
+};
+
+const headline = {
+  fontSize: "clamp(2rem, 5vw, 3.5rem)",
+  marginBottom: "10px",
 };
 
 const overlay = {
@@ -78,6 +110,7 @@ const liveBadge = {
   padding: "6px 10px",
   borderRadius: 6,
   fontWeight: 700,
+  letterSpacing: "1px",
 };
 
 const buttons = {
@@ -87,6 +120,15 @@ const buttons = {
   transform: "translateX(-50%)",
   display: "flex",
   gap: 15,
+  flexWrap: "wrap",
+  justifyContent: "center",
+};
+
+const heroButtons = {
+  display: "flex",
+  gap: "15px",
+  justifyContent: "center",
+  flexWrap: "wrap",
 };
 
 const primaryBtn = {
@@ -95,12 +137,14 @@ const primaryBtn = {
   color: "#000",
   borderRadius: 8,
   textDecoration: "none",
+  fontWeight: 700,
 };
 
 const secondaryBtn = {
   padding: "12px 24px",
-  border: "1px solid #fff",
+  border: "1px solid rgba(255,255,255,0.3)",
   borderRadius: 8,
   color: "#fff",
   textDecoration: "none",
+  fontWeight: 600,
 };

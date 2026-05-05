@@ -43,26 +43,27 @@ export default function RootLayout({
         />
         <meta name="apple-mobile-web-app-title" content="TRIGGA5TREY" />
 
-        {/* 🔥 FIXED iOS SPLASH SCREENS */}
+        {/* 🔥 REAL iOS SPLASH SCREENS (DEVICE MATCHED) */}
+
+        {/* iPhone 14 / 15 */}
         <link
           rel="apple-touch-startup-image"
-          href="/splash.png"
-          media="(device-width: 390px) and (device-height: 844px)"
+          href="/splash-1170x2532.png"
+          media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)"
         />
+
+        {/* iPhone 14 Pro */}
         <link
           rel="apple-touch-startup-image"
-          href="/splash.png"
-          media="(device-width: 393px) and (device-height: 852px)"
+          href="/splash-1179x2556.png"
+          media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)"
         />
+
+        {/* iPhone 14 Pro Max / 15 Pro Max */}
         <link
           rel="apple-touch-startup-image"
-          href="/splash.png"
-          media="(device-width: 428px) and (device-height: 926px)"
-        />
-        <link
-          rel="apple-touch-startup-image"
-          href="/splash.png"
-          media="(device-width: 430px) and (device-height: 932px)"
+          href="/splash-1290x2796.png"
+          media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)"
         />
       </head>
 
