@@ -32,3 +32,18 @@ body {
 .juicer-feed .j-stacker {
   background: transparent !important;
 }
+
+/* 🔥 Hide scrollbar (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Firefox */
+html {
+  scrollbar-width: none;
+}
+
+/* Prevent layout shift */
+body {
+  overflow-x: hidden;
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,16 +13,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "TRIGGA5TREY",
-  description: "Official Site of Trey Lance",
+  description: "Official site",
+  manifest: "/manifest.json",
+  themeColor: "#000000",
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-orange.png",
   },
 };
-
-import Navbar from "@/components/Navbar";
 
 export default function RootLayout({
   children,
@@ -30,15 +31,40 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* 🔥 iOS APP MODE */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+        <meta name="apple-mobile-web-app-title" content="TRIGGA5TREY" />
+
+        {/* 🔥 SPLASH SCREEN */}
+        <link rel="apple-touch-startup-image" href="/splash.png" />
+      </head>
+
       <body
+        className={`${geistSans.variable} ${geistMono.variable}`}
         style={{
           margin: 0,
-          background: "#000",
+          backgroundColor: "#000",
+          backgroundImage: "url('/hero.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
         }}
       >
-        <Navbar />
-
-        {children}
+        {/* 🔥 GLOBAL OVERLAY (important for readability) */}
+        <div
+          style={{
+            minHeight: "100vh",
+            background: "rgba(0,0,0,0.75)",
+          }}
+        >
+          <Navbar />
+          {children}
+        </div>
       </body>
     </html>
   );
