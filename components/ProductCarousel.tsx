@@ -17,6 +17,7 @@ export default function ProductCarousel() {
 
   const current = items[index];
 
+  /* 🔥 AUTO ROTATE (stops after interaction) */
   useEffect(() => {
     if (hasInteracted) return;
 
@@ -30,12 +31,14 @@ export default function ProductCarousel() {
     return () => clearInterval(interval);
   }, [items.length, hasInteracted]);
 
+  /* 🔥 PARALLAX */
   const handleMove = (e: any) => {
     const x = (e.clientX / window.innerWidth - 0.5) * 30;
     const y = (e.clientY / window.innerHeight - 0.5) * 30;
     setMouse({ x, y });
   };
 
+  /* 🔥 TOUCH / SWIPE */
   const onTouchStart = (e: any) => {
     startX.current = e.touches[0].clientX;
   };
@@ -43,10 +46,12 @@ export default function ProductCarousel() {
   const onTouchEnd = (e: any) => {
     const diff = startX.current - e.changedTouches[0].clientX;
 
-    if (Math.abs(diff) > 50) setHasInteracted(true);
+    if (Math.abs(diff) > 50) {
+      setHasInteracted(true);
 
-    if (diff > 50) next();
-    if (diff < -50) prev();
+      if (diff > 0) next();
+      else prev();
+    }
   };
 
   const next = () => {
@@ -74,7 +79,7 @@ export default function ProductCarousel() {
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      {/* 🔥 SINGLE SOFT GLOW */}
+      {/* 🔥 GLOW */}
       <div
         style={{
           ...glow,
@@ -102,9 +107,24 @@ export default function ProductCarousel() {
         <ProductCard product={current} />
       </div>
 
-      <button onClick={prev} style={arrowLeft}>‹</button>
-      <button onClick={next} style={arrowRight}>›</button>
+      {/* 🔥 ARROWS (FIXED TOUCH ISSUE) */}
+      <button
+        onClick={prev}
+        onTouchStart={(e) => e.stopPropagation()}
+        style={arrowLeft}
+      >
+        ‹
+      </button>
 
+      <button
+        onClick={next}
+        onTouchStart={(e) => e.stopPropagation()}
+        style={arrowRight}
+      >
+        ›
+      </button>
+
+      {/* 🔥 ANIMATIONS */}
       <style>
         {`
           @keyframes slideRight {
@@ -122,19 +142,23 @@ export default function ProductCarousel() {
   );
 }
 
+/* 🔥 STYLES */
+
 const section: CSSProperties = {
   position: "relative",
   height: "520px",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  overflow: "visible",
+  overflow: "hidden",
+  touchAction: "pan-y",
+  WebkitOverflowScrolling: "touch",
 };
 
 const glow: CSSProperties = {
   position: "absolute",
-  width: "600px",
-  height: "600px",
+  width: "120%",
+  height: "120%",
   filter: "blur(120px)",
   opacity: 0.35,
   borderRadius: "50%",
@@ -158,7 +182,15 @@ const arrowBase: CSSProperties = {
   height: "42px",
   borderRadius: "50%",
   cursor: "pointer",
+  zIndex: 10,
 };
 
-const arrowLeft = { ...arrowBase, left: "40px" };
-const arrowRight = { ...arrowBase, right: "40px" };
+const arrowLeft: CSSProperties = {
+  ...arrowBase,
+  left: "20px",
+};
+
+const arrowRight: CSSProperties = {
+  ...arrowBase,
+  right: "20px",
+};

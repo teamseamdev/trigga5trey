@@ -91,7 +91,7 @@ export default async function Socials() {
           />
 
           <SocialButton
-            href="https://instagram.com/YOUR_USERNAME"
+            href="https://instagram.com/trey.lance"
             label="Instagram"
             color="linear-gradient(45deg, #ff0069, #ff7a00)"
             glowColor="rgba(255,0,105,0.6)"
@@ -99,7 +99,7 @@ export default async function Socials() {
           />
 
           <SocialButton
-            href="https://tiktok.com/@YOUR_USERNAME"
+            href="https://tiktok.com/@trigga5trey"
             label="TikTok"
             color="#000"
             glowColor="rgba(255,255,255,0.2)"
