@@ -17,7 +17,6 @@ export default function ProductCarousel() {
 
   const current = items[index];
 
-  /* 🔥 AUTO ROTATE (stops on interaction) */
   useEffect(() => {
     if (hasInteracted) return;
 
@@ -31,14 +30,12 @@ export default function ProductCarousel() {
     return () => clearInterval(interval);
   }, [items.length, hasInteracted]);
 
-  /* 🔥 PARALLAX */
   const handleMove = (e: any) => {
-    const x = (e.clientX / window.innerWidth - 0.5) * 20;
-    const y = (e.clientY / window.innerHeight - 0.5) * 20;
+    const x = (e.clientX / window.innerWidth - 0.5) * 30;
+    const y = (e.clientY / window.innerHeight - 0.5) * 30;
     setMouse({ x, y });
   };
 
-  /* 🔥 SWIPE */
   const onTouchStart = (e: any) => {
     startX.current = e.touches[0].clientX;
   };
@@ -46,9 +43,7 @@ export default function ProductCarousel() {
   const onTouchEnd = (e: any) => {
     const diff = startX.current - e.changedTouches[0].clientX;
 
-    if (Math.abs(diff) > 50) {
-      setHasInteracted(true);
-    }
+    if (Math.abs(diff) > 50) setHasInteracted(true);
 
     if (diff > 50) next();
     if (diff < -50) prev();
@@ -79,12 +74,14 @@ export default function ProductCarousel() {
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      {/* 🔥 GLOW BACKGROUND */}
+      {/* 🔥 SINGLE SOFT GLOW */}
       <div
         style={{
           ...glow,
-          background: current.glow || "#ff7a00",
-          transform: `translate(${mouse.x}px, ${mouse.y}px)`,
+          background: `radial-gradient(circle, ${
+            current.glow || "#ff7a00"
+          } 0%, transparent 65%)`,
+          transform: `translate(${mouse.x}px, ${mouse.y}px) scale(1.3)`,
         }}
       />
 
@@ -93,7 +90,9 @@ export default function ProductCarousel() {
         key={current.id}
         style={{
           ...productWrap,
-          transform: `translate(${mouse.x * 0.5}px, ${mouse.y * 0.5}px)`,
+          transform: `translate(${mouse.x * 0.4}px, ${
+            mouse.y * 0.4
+          }px)`,
           animation:
             direction === "next"
               ? "slideRight 0.5s ease"
@@ -103,11 +102,9 @@ export default function ProductCarousel() {
         <ProductCard product={current} />
       </div>
 
-      {/* 🔥 ARROWS */}
       <button onClick={prev} style={arrowLeft}>‹</button>
       <button onClick={next} style={arrowRight}>›</button>
 
-      {/* 🔥 ANIMATIONS */}
       <style>
         {`
           @keyframes slideRight {
@@ -125,24 +122,23 @@ export default function ProductCarousel() {
   );
 }
 
-/* 🔥 STYLES */
-
 const section: CSSProperties = {
   position: "relative",
   height: "520px",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  overflow: "hidden",
+  overflow: "visible",
 };
 
 const glow: CSSProperties = {
   position: "absolute",
-  width: "500px",
-  height: "500px",
+  width: "600px",
+  height: "600px",
   filter: "blur(120px)",
-  opacity: 0.25,
+  opacity: 0.35,
   borderRadius: "50%",
+  pointerEvents: "none",
   transition: "all 0.6s ease",
 };
 
@@ -150,8 +146,6 @@ const productWrap: CSSProperties = {
   zIndex: 2,
   transition: "transform 0.2s ease",
 };
-
-/* 🔥 ARROWS */
 
 const arrowBase: CSSProperties = {
   position: "absolute",
@@ -164,15 +158,7 @@ const arrowBase: CSSProperties = {
   height: "42px",
   borderRadius: "50%",
   cursor: "pointer",
-  zIndex: 5,
 };
 
-const arrowLeft: CSSProperties = {
-  ...arrowBase,
-  left: "40px",
-};
-
-const arrowRight: CSSProperties = {
-  ...arrowBase,
-  right: "40px",
-};
+const arrowLeft = { ...arrowBase, left: "40px" };
+const arrowRight = { ...arrowBase, right: "40px" };

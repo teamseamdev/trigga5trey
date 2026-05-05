@@ -138,7 +138,7 @@ export const products = [
     link: "https://trigga5trey-shop.fourthwall.com/products/trigga5trey-gimme-my-pop-desk-mat-black",
     category: "accessories",
     featured: true,
-    glow: "#ff7a00"
+   
   },
 
   {
