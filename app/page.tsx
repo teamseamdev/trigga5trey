@@ -63,7 +63,7 @@ export default async function Home() {
             }}
           >
             <iframe
-              src="https://player.twitch.tv/?channel=trigga5trey&parent=localhost"
+              src="src={`https://player.twitch.tv/?channel=trigga5trey&parent=${process.env.NEXT_PUBLIC_SITE_URL}`}"
               height={600}
               width="100%"
               allowFullScreen
