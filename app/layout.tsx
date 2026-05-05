@@ -12,9 +12,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Trigga5Trey",
-  description: "Offical Trigga5Trey Website",
+export const metadata = {
+  title: "TRIGGA5TREY",
+  description: "Official Site of Trey Lance",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 import Navbar from "@/components/Navbar";
