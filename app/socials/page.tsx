@@ -15,7 +15,6 @@ export default async function Socials() {
   return (
     <main
       style={{
-        background: "#000",
         color: "#fff",
         minHeight: "100vh",
         fontFamily: "Inter, Arial, sans-serif",
@@ -24,7 +23,7 @@ export default async function Socials() {
       {/* HEADER */}
       <section
         style={{
-          padding: "80px 40px 40px",
+          padding: "80px 20px 40px",
           maxWidth: "1200px",
           margin: "0 auto",
           textAlign: "center",
@@ -44,7 +43,7 @@ export default async function Socials() {
         style={{
           maxWidth: "1200px",
           margin: "0 auto",
-          padding: "0 40px 60px",
+          padding: "0 20px 60px",
         }}
       >
         <div
@@ -54,6 +53,7 @@ export default async function Socials() {
             gap: "20px",
             flexWrap: "nowrap",
             overflowX: "auto",
+            paddingBottom: "10px",
           }}
         >
           <SocialButton
@@ -82,7 +82,6 @@ export default async function Socials() {
             icon={<FaDiscord size={18} />}
           />
 
-          {/* 🔥 YouTube */}
           <SocialButton
             href="https://www.youtube.com/@TriggaVTrey"
             label="YouTube"
@@ -91,7 +90,6 @@ export default async function Socials() {
             icon={<FaYoutube size={18} />}
           />
 
-          {/* Instagram */}
           <SocialButton
             href="https://instagram.com/YOUR_USERNAME"
             label="Instagram"
@@ -100,7 +98,6 @@ export default async function Socials() {
             icon={<FaInstagram size={18} />}
           />
 
-          {/* TikTok */}
           <SocialButton
             href="https://tiktok.com/@YOUR_USERNAME"
             label="TikTok"
@@ -112,26 +109,43 @@ export default async function Socials() {
         </div>
       </section>
 
-      {/* FEED */}
-      <section style={{ position: "relative" }}>
-        <div style={fadeTop} />
+      {/* 🔥 FEED CARD (glass effect) */}
+      <section
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+          padding: "0 20px 80px",
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            borderRadius: "16px",
+            overflow: "hidden",
+            background: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          <div style={fadeTop} />
 
-        <iframe
-          src="https://www.juicer.io/api/feeds/trey-lance/iframe"
-          width="100%"
-          height="2200"
-          scrolling="no"
-          style={{ border: "none", display: "block" }}
-          title="TRIGGA5TREY Social Feed"
-        />
+          <iframe
+            src="https://www.juicer.io/api/feeds/trey-lance/iframe"
+            width="100%"
+            height="2000"
+            scrolling="no"
+            style={{ border: "none", display: "block" }}
+            title="TRIGGA5TREY Social Feed"
+          />
 
-        <div style={fadeBottom} />
+          <div style={fadeBottom} />
+        </div>
       </section>
     </main>
   );
 }
 
-/* FADE */
+/* FADE EFFECTS */
 const fadeTop = {
   position: "absolute" as const,
   top: 0,
@@ -139,7 +153,7 @@ const fadeTop = {
   right: 0,
   height: "120px",
   background:
-    "linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.6) 60%, transparent 100%)",
+    "linear-gradient(to bottom, rgba(0,0,0,0.9), transparent)",
   zIndex: 2,
   pointerEvents: "none" as const,
 };
@@ -151,7 +165,7 @@ const fadeBottom = {
   right: 0,
   height: "120px",
   background:
-    "linear-gradient(to top, #000 0%, rgba(0,0,0,0.6) 60%, transparent 100%)",
+    "linear-gradient(to top, rgba(0,0,0,0.9), transparent)",
   zIndex: 2,
   pointerEvents: "none" as const,
 };

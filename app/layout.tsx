@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -17,11 +17,14 @@ export const metadata: Metadata = {
   title: "TRIGGA5TREY",
   description: "Official site",
   manifest: "/manifest.json",
-  themeColor: "#000000",
   icons: {
     icon: "/favicon.ico",
-    apple: "/apple-orange.png",
+    apple: "/apple-touch-icon.png",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -40,8 +43,27 @@ export default function RootLayout({
         />
         <meta name="apple-mobile-web-app-title" content="TRIGGA5TREY" />
 
-        {/* 🔥 SPLASH SCREEN */}
-        <link rel="apple-touch-startup-image" href="/splash.png" />
+        {/* 🔥 FIXED iOS SPLASH SCREENS */}
+        <link
+          rel="apple-touch-startup-image"
+          href="/splash.png"
+          media="(device-width: 390px) and (device-height: 844px)"
+        />
+        <link
+          rel="apple-touch-startup-image"
+          href="/splash.png"
+          media="(device-width: 393px) and (device-height: 852px)"
+        />
+        <link
+          rel="apple-touch-startup-image"
+          href="/splash.png"
+          media="(device-width: 428px) and (device-height: 926px)"
+        />
+        <link
+          rel="apple-touch-startup-image"
+          href="/splash.png"
+          media="(device-width: 430px) and (device-height: 932px)"
+        />
       </head>
 
       <body
@@ -55,7 +77,7 @@ export default function RootLayout({
           backgroundAttachment: "fixed",
         }}
       >
-        {/* 🔥 GLOBAL OVERLAY (important for readability) */}
+        {/* 🔥 GLOBAL OVERLAY */}
         <div
           style={{
             minHeight: "100vh",
