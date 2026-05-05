@@ -2,6 +2,7 @@ import { isTwitchLive } from "@/lib/twitch";
 import TwitchPlayer from "@/components/TwitchPlayer";
 import { CSSProperties } from "react";
 
+
 const FORCE_LIVE = false;
 
 export default async function Home() {
@@ -72,8 +73,12 @@ function OfflineHero() {
         </div>
       </div>
     </section>
+    
   );
 }
+
+
+
 
 /* 🔥 STYLES (TYPE SAFE) */
 

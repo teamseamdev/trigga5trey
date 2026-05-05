@@ -1,5 +1,4 @@
-import { products } from "@/data/products";
-import ProductCard from "@/components/ProductCard";
+import ProductCarousel from "@/components/ProductCarousel";
 
 export default function Shop() {
   return (
@@ -28,7 +27,7 @@ export default function Shop() {
         </p>
       </section>
 
-      {/* 🔥 PRODUCT GRID (glass container) */}
+      {/* 🔥 FEATURED CAROUSEL ONLY */}
       <section
         style={{
           maxWidth: "1200px",
@@ -36,40 +35,39 @@ export default function Shop() {
           padding: "20px",
         }}
       >
-        <div
+        <h2
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: "30px",
-            padding: "30px",
-            borderRadius: "16px",
-            background: "rgba(0,0,0,0.6)",
-            backdropFilter: "blur(10px)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            textAlign: "center",
+            marginBottom: "20px",
           }}
         >
-          {products.map((product, i) => (
-            <ProductCard key={i} product={product} />
-          ))}
-        </div>
+          Featured
+        </h2>
+
+        <ProductCarousel />
       </section>
 
-      {/* CTA */}
-      <div style={{ textAlign: "center", padding: "60px 20px" }}>
+      {/* 🔥 CTA */}
+      <div
+        style={{
+          textAlign: "center",
+          padding: "60px 20px",
+        }}
+      >
         <a
           href="https://trigga5trey-shop.fourthwall.com"
           target="_blank"
           rel="noopener noreferrer"
           style={ctaBtn}
         >
-          View Full Store →
+          View All Merch →
         </a>
       </div>
     </main>
   );
 }
 
-/* CTA BUTTON */
+/* BUTTON */
 const ctaBtn = {
   padding: "14px 30px",
   background: "#ff7a00",
@@ -77,5 +75,4 @@ const ctaBtn = {
   borderRadius: "8px",
   fontWeight: 700,
   textDecoration: "none",
-  transition: "0.25s ease",
 };
