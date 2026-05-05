@@ -1,7 +1,10 @@
 import { isTwitchLive } from "@/lib/twitch";
+import TwitchPlayer from "@/components/TwitchPlayer";
+
+const FORCE_LIVE = true; // 🔥 set true for testing
 
 export default async function Home() {
-  const isLive = await isTwitchLive("trigga5trey");
+  const isLive = FORCE_LIVE || (await isTwitchLive("trigga5trey"));
 
   return (
     <main
@@ -12,178 +15,110 @@ export default async function Home() {
         fontFamily: "Inter, Arial, sans-serif",
       }}
     >
-      {/* HEADER */}
- 
-
-      {isLive ? (
-        // 🔴 LIVE MODE
-        <section
-          style={{
-            padding: "60px 40px",
-            maxWidth: "1200px",
-            margin: "0 auto",
-          }}
-        >
-          <div style={{ marginBottom: "20px" }}>
-            <span
-              style={{
-                color: "#ff2d2d",
-                fontWeight: 600,
-                letterSpacing: "1px",
-              }}
-            >
-              ● LIVE NOW
-            </span>
-          </div>
-
-          <div
-            style={{
-              borderRadius: "16px",
-              overflow: "hidden",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
-            }}
-          >
-            <iframe
-              src={`https://player.twitch.tv/?channel=trigga5trey&parent=${process.env.NEXT_PUBLIC_SITE_URL}`}
-              height={600}
-              width="100%"
-              allowFullScreen
-              style={{ border: "none" }}
-            />
-          </div>
-        </section>
-      ) : (
-        // 🟢 OFFLINE HERO
-        <section
-          style={{
-            position: "relative",
-            height: "85vh",
-            display: "flex",
-            alignItems: "center",
-            padding: "0 60px",
-          }}
-        >
-          {/* BACKGROUND */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              backgroundImage:
-                "url('https://images.unsplash.com/photo-1519681393784-d120267933ba')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              filter: "grayscale(100%) contrast(120%)",
-            }}
-          />
-
-          {/* OVERLAY */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background:
-                "linear-gradient(to right, rgba(0,0,0,0.85), rgba(0,0,0,0.4))",
-            }}
-          />
-
-          {/* CONTENT */}
-          <div style={{ position: "relative", zIndex: 2, maxWidth: "600px" }}>
-            <h1
-              style={{
-                fontSize: "3.5rem",
-                lineHeight: 1.1,
-                fontWeight: 700,
-              }}
-            >
-              WELCOME TO{" "}
-              <span style={{ color: "#ff6a00" }}>THE FIVE</span>
-            </h1>
-
-            <p
-              style={{
-                marginTop: "15px",
-                opacity: 0.7,
-                fontSize: "1.1rem",
-              }}
-            >
-              Stream. Culture. Community.
-            </p>
-
-            <div style={{ marginTop: "30px", display: "flex", gap: "15px" }}>
-              <a
-                href="https://trigga5trey-shop.fourthwall.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={primaryBtn}
-              >
-                Shop Collection
-              </a>
-
-              <a
-                href="https://discord.gg/MVzzrFtUcR"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={secondaryBtn}
-              >
-                Join Discord
-              </a>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* FOOTER */}
-      <section
-        style={{
-          padding: "40px",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          display: "flex",
-          justifyContent: "center",
-          gap: "30px",
-        }}
-      >
-        <a href="https://www.twitch.tv/trigga5trey" target="_blank" style={social}>
-          Twitch
-        </a>
-
-        <a href="https://kick.com/trigga5trey" target="_blank" style={social}>
-          Kick
-        </a>
-
-        <a href="https://discord.gg/MVzzrFtUcR" target="_blank" style={social}>
-          Discord
-        </a>
-      </section>
+      {isLive ? <LiveView /> : <OfflineHero />}
     </main>
   );
 }
 
-/* STYLES */
-const navLink = {
-  color: "#aaa",
-  textDecoration: "none",
-  fontSize: "0.9rem",
-};
+/* 🔴 LIVE VIEW */
+function LiveView() {
+  return (
+    <section
+      style={{
+        height: "100vh",
+        position: "relative",
+      }}
+    >
+      {/* ✅ FIXED TWITCH PLAYER */}
+      <TwitchPlayer channel="jynxzi" />
 
+      {/* 🔴 LIVE BADGE */}
+      <div
+        style={{
+          position: "absolute",
+          top: "20px",
+          left: "20px",
+          background: "#ff2d2d",
+          padding: "6px 10px",
+          borderRadius: "6px",
+          fontSize: "12px",
+          fontWeight: 700,
+          letterSpacing: "1px",
+        }}
+      >
+        LIVE
+      </div>
+
+      {/* BUTTONS */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "40px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: "15px",
+        }}
+      >
+        <a href="/shop" style={primaryBtn}>
+          Shop Merch
+        </a>
+
+        <a
+          href="https://discord.gg/MVzzrFtUcR"
+          target="_blank"
+          style={secondaryBtn}
+        >
+          Join Discord
+        </a>
+      </div>
+    </section>
+  );
+}
+
+/* ⚫ OFFLINE HERO */
+function OfflineHero() {
+  return (
+    <section
+      style={{
+        height: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+      }}
+    >
+      <div>
+        <h1 style={{ fontSize: "3rem" }}>
+          WELCOME TO <span style={{ color: "#ff7a00" }}>THE FIVE</span>
+        </h1>
+
+        <p style={{ opacity: 0.7 }}>Stream. Culture. Community.</p>
+
+        <div style={{ marginTop: "20px" }}>
+          <a href="/shop" style={primaryBtn}>
+            Shop Collection
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* BUTTONS */
 const primaryBtn = {
-  padding: "12px 22px",
-  background: "#fff",
+  padding: "12px 24px",
+  background: "#ff7a00",
   color: "#000",
-  borderRadius: "6px",
+  borderRadius: "8px",
+  fontWeight: 700,
   textDecoration: "none",
-  fontWeight: 600,
 };
 
 const secondaryBtn = {
-  padding: "12px 22px",
-  border: "1px solid #444",
-  borderRadius: "6px",
+  padding: "12px 24px",
+  border: "1px solid rgba(255,255,255,0.2)",
+  borderRadius: "8px",
   color: "#fff",
   textDecoration: "none",
-};
-
-const social = {
-  color: "#888",
-  textDecoration: "none",
-  fontSize: "0.9rem",
 };
