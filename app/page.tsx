@@ -1,5 +1,6 @@
 import { isTwitchLive } from "@/lib/twitch";
 import TwitchPlayer from "@/components/TwitchPlayer";
+import { CSSProperties } from "react";
 
 const FORCE_LIVE = false;
 
@@ -7,12 +8,7 @@ export default async function Home() {
   const isLive = FORCE_LIVE || (await isTwitchLive("trigga5trey"));
 
   return (
-    <main
-      style={{
-        color: "#fff",
-        minHeight: "100vh",
-      }}
-    >
+    <main style={main}>
       {isLive ? <LiveView /> : <OfflineHero />}
     </main>
   );
@@ -21,7 +17,7 @@ export default async function Home() {
 /* 🔴 LIVE VIEW */
 function LiveView() {
   return (
-    <section style={{ height: "100vh", position: "relative" }}>
+    <section style={liveSection}>
       <TwitchPlayer channel="trigga5trey" />
 
       <div style={overlay} />
@@ -56,11 +52,10 @@ function OfflineHero() {
           <span style={{ color: "#ff7a00" }}>THE FIVE</span>
         </h1>
 
-        <p style={{ opacity: 0.8, marginBottom: "25px" }}>
+        <p style={subText}>
           Stream. Culture. Community.
         </p>
 
-        {/* 🔥 FIXED BUTTON ROW */}
         <div style={heroButtons}>
           <a href="/shop" style={primaryBtn}>
             Shop Collection
@@ -80,30 +75,45 @@ function OfflineHero() {
   );
 }
 
-/* 🔥 STYLES */
+/* 🔥 STYLES (TYPE SAFE) */
 
-const centered = {
+const main: CSSProperties = {
+  color: "#fff",
+  minHeight: "100vh",
+};
+
+const liveSection: CSSProperties = {
+  height: "100vh",
+  position: "relative",
+};
+
+const centered: CSSProperties = {
   height: "100vh",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  textAlign: "center" as const,
+  textAlign: "center",
   padding: "0 20px",
 };
 
-const headline = {
+const headline: CSSProperties = {
   fontSize: "clamp(2rem, 5vw, 3.5rem)",
   marginBottom: "10px",
 };
 
-const overlay = {
-  position: "absolute" as const,
+const subText: CSSProperties = {
+  opacity: 0.8,
+  marginBottom: "25px",
+};
+
+const overlay: CSSProperties = {
+  position: "absolute",
   inset: 0,
   background: "rgba(0,0,0,0.3)",
 };
 
-const liveBadge = {
-  position: "absolute" as const,
+const liveBadge: CSSProperties = {
+  position: "absolute",
   top: 20,
   left: 20,
   background: "#ff2d2d",
@@ -113,8 +123,8 @@ const liveBadge = {
   letterSpacing: "1px",
 };
 
-const buttons = {
-  position: "absolute" as const,
+const buttons: CSSProperties = {
+  position: "absolute",
   bottom: 40,
   left: "50%",
   transform: "translateX(-50%)",
@@ -124,14 +134,14 @@ const buttons = {
   justifyContent: "center",
 };
 
-const heroButtons = {
+const heroButtons: CSSProperties = {
   display: "flex",
   gap: "15px",
   justifyContent: "center",
   flexWrap: "wrap",
 };
 
-const primaryBtn = {
+const primaryBtn: CSSProperties = {
   padding: "12px 24px",
   background: "#ff7a00",
   color: "#000",
@@ -140,7 +150,7 @@ const primaryBtn = {
   fontWeight: 700,
 };
 
-const secondaryBtn = {
+const secondaryBtn: CSSProperties = {
   padding: "12px 24px",
   border: "1px solid rgba(255,255,255,0.3)",
   borderRadius: 8,
