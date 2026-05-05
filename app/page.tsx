@@ -1,7 +1,7 @@
 import { isTwitchLive } from "@/lib/twitch";
 import TwitchPlayer from "@/components/TwitchPlayer";
 
-const FORCE_LIVE = true; // 🔥 set true for testing
+const FORCE_LIVE = false; // 🔥 set true for testing
 
 export default async function Home() {
   const isLive = FORCE_LIVE || (await isTwitchLive("trigga5trey"));
@@ -30,7 +30,7 @@ function LiveView() {
       }}
     >
       {/* ✅ FIXED TWITCH PLAYER */}
-      <TwitchPlayer channel="jynxzi" />
+      <TwitchPlayer channel="trigga5trey" />
 
       {/* 🔴 LIVE BADGE */}
       <div
