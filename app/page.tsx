@@ -13,29 +13,10 @@ export default async function Home() {
       }}
     >
       {/* HEADER */}
-      <header
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "20px 40px",
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-        }}
-      >
-        <h2 style={{ letterSpacing: "3px", fontWeight: 600 }}>
-          TRIGGA5TREY
-        </h2>
-
-        <nav style={{ display: "flex", gap: "25px" }}>
-          <a href="/" style={navLink}>Home</a>
-          <a href="https://yourstore.fourthwall.com" target="_blank" style={navLink}>
-            Shop
-          </a>
-        </nav>
-      </header>
+ 
 
       {isLive ? (
-        // 🔴 LIVE MODE (CLEAN CINEMATIC PLAYER)
+        // 🔴 LIVE MODE
         <section
           style={{
             padding: "60px 40px",
@@ -63,7 +44,7 @@ export default async function Home() {
             }}
           >
             <iframe
-              src="src={`https://player.twitch.tv/?channel=trigga5trey&parent=${process.env.NEXT_PUBLIC_SITE_URL}`}"
+              src={`https://player.twitch.tv/?channel=trigga5trey&parent=${process.env.NEXT_PUBLIC_SITE_URL}`}
               height={600}
               width="100%"
               allowFullScreen
@@ -95,7 +76,7 @@ export default async function Home() {
             }}
           />
 
-          {/* DARK OVERLAY */}
+          {/* OVERLAY */}
           <div
             style={{
               position: "absolute",
@@ -132,6 +113,7 @@ export default async function Home() {
               <a
                 href="https://trigga5trey-shop.fourthwall.com/"
                 target="_blank"
+                rel="noopener noreferrer"
                 style={primaryBtn}
               >
                 Shop Collection
@@ -140,6 +122,7 @@ export default async function Home() {
               <a
                 href="https://discord.gg/MVzzrFtUcR"
                 target="_blank"
+                rel="noopener noreferrer"
                 style={secondaryBtn}
               >
                 Join Discord
@@ -149,7 +132,7 @@ export default async function Home() {
         </section>
       )}
 
-      {/* FOOTER / SOCIAL BAR */}
+      {/* FOOTER */}
       <section
         style={{
           padding: "40px",

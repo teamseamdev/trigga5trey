@@ -1,26 +1,33 @@
 export async function isTwitchLive(username: string) {
-  // Get access token
-  const tokenRes = await fetch(
-    `https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=client_credentials`,
-    { method: "POST" }
-  );
-
-  const tokenData = await tokenRes.json();
-
-  const accessToken = tokenData.access_token;
-
-  // Check stream
-  const streamRes = await fetch(
-    `https://api.twitch.tv/helix/streams?user_login=${username}`,
-    {
+  try {
+    const tokenRes = await fetch("https://id.twitch.tv/oauth2/token", {
+      method: "POST",
       headers: {
-        "Client-ID": process.env.TWITCH_CLIENT_ID!,
-        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-    }
-  );
+      body: `client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=client_credentials`,
+      cache: "no-store",
+    });
 
-  const streamData = await streamRes.json();
+    const tokenData = await tokenRes.json();
+    const accessToken = tokenData.access_token;
 
-  return streamData.data.length > 0;
+    const streamRes = await fetch(
+      `https://api.twitch.tv/helix/streams?user_login=${username}`,
+      {
+        headers: {
+          "Client-ID": process.env.TWITCH_CLIENT_ID!,
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: "no-store",
+      }
+    );
+
+    const streamData = await streamRes.json();
+
+    return streamData.data && streamData.data.length > 0;
+  } catch (err) {
+    console.error("Twitch API error:", err);
+    return false;
+  }
 }

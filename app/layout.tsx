@@ -17,17 +17,25 @@ export const metadata: Metadata = {
   description: "Offical Trigga5Trey Website",
 };
 
+import Navbar from "@/components/Navbar";
+
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en">
+      <body
+        style={{
+          margin: 0,
+          background: "#000",
+        }}
+      >
+        <Navbar />
+
+        {children}
+      </body>
     </html>
   );
 }
