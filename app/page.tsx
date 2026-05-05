@@ -1,65 +1,206 @@
-import Image from "next/image";
+import { isTwitchLive } from "@/lib/twitch";
 
-export default function Home() {
+export default async function Home() {
+  const isLive = await isTwitchLive("trigga5trey");
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main
+      style={{
+        background: "#000",
+        color: "#fff",
+        minHeight: "100vh",
+        fontFamily: "Inter, Arial, sans-serif",
+      }}
+    >
+      {/* HEADER */}
+      <header
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "20px 40px",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        <h2 style={{ letterSpacing: "3px", fontWeight: 600 }}>
+          TRIGGA5TREY
+        </h2>
+
+        <nav style={{ display: "flex", gap: "25px" }}>
+          <a href="/" style={navLink}>Home</a>
+          <a href="https://yourstore.fourthwall.com" target="_blank" style={navLink}>
+            Shop
+          </a>
+        </nav>
+      </header>
+
+      {isLive ? (
+        // 🔴 LIVE MODE (CLEAN CINEMATIC PLAYER)
+        <section
+          style={{
+            padding: "60px 40px",
+            maxWidth: "1200px",
+            margin: "0 auto",
+          }}
+        >
+          <div style={{ marginBottom: "20px" }}>
+            <span
+              style={{
+                color: "#ff2d2d",
+                fontWeight: 600,
+                letterSpacing: "1px",
+              }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+              ● LIVE NOW
+            </span>
+          </div>
+
+          <div
+            style={{
+              borderRadius: "16px",
+              overflow: "hidden",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+            <iframe
+              src="https://player.twitch.tv/?channel=trigga5trey&parent=localhost"
+              height={600}
+              width="100%"
+              allowFullScreen
+              style={{ border: "none" }}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+          </div>
+        </section>
+      ) : (
+        // 🟢 OFFLINE HERO
+        <section
+          style={{
+            position: "relative",
+            height: "85vh",
+            display: "flex",
+            alignItems: "center",
+            padding: "0 60px",
+          }}
+        >
+          {/* BACKGROUND */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              backgroundImage:
+                "url('https://images.unsplash.com/photo-1519681393784-d120267933ba')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              filter: "grayscale(100%) contrast(120%)",
+            }}
+          />
+
+          {/* DARK OVERLAY */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(to right, rgba(0,0,0,0.85), rgba(0,0,0,0.4))",
+            }}
+          />
+
+          {/* CONTENT */}
+          <div style={{ position: "relative", zIndex: 2, maxWidth: "600px" }}>
+            <h1
+              style={{
+                fontSize: "3.5rem",
+                lineHeight: 1.1,
+                fontWeight: 700,
+              }}
+            >
+              WELCOME TO{" "}
+              <span style={{ color: "#ff6a00" }}>THE FIVE</span>
+            </h1>
+
+            <p
+              style={{
+                marginTop: "15px",
+                opacity: 0.7,
+                fontSize: "1.1rem",
+              }}
+            >
+              Stream. Culture. Community.
+            </p>
+
+            <div style={{ marginTop: "30px", display: "flex", gap: "15px" }}>
+              <a
+                href="https://trigga5trey-shop.fourthwall.com/"
+                target="_blank"
+                style={primaryBtn}
+              >
+                Shop Collection
+              </a>
+
+              <a
+                href="https://discord.gg/MVzzrFtUcR"
+                target="_blank"
+                style={secondaryBtn}
+              >
+                Join Discord
+              </a>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* FOOTER / SOCIAL BAR */}
+      <section
+        style={{
+          padding: "40px",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          display: "flex",
+          justifyContent: "center",
+          gap: "30px",
+        }}
+      >
+        <a href="https://www.twitch.tv/trigga5trey" target="_blank" style={social}>
+          Twitch
+        </a>
+
+        <a href="https://kick.com/trigga5trey" target="_blank" style={social}>
+          Kick
+        </a>
+
+        <a href="https://discord.gg/MVzzrFtUcR" target="_blank" style={social}>
+          Discord
+        </a>
+      </section>
+    </main>
   );
 }
+
+/* STYLES */
+const navLink = {
+  color: "#aaa",
+  textDecoration: "none",
+  fontSize: "0.9rem",
+};
+
+const primaryBtn = {
+  padding: "12px 22px",
+  background: "#fff",
+  color: "#000",
+  borderRadius: "6px",
+  textDecoration: "none",
+  fontWeight: 600,
+};
+
+const secondaryBtn = {
+  padding: "12px 22px",
+  border: "1px solid #444",
+  borderRadius: "6px",
+  color: "#fff",
+  textDecoration: "none",
+};
+
+const social = {
+  color: "#888",
+  textDecoration: "none",
+  fontSize: "0.9rem",
+};
