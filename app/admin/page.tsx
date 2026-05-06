@@ -13,16 +13,25 @@ export default function AdminPage() {
 
   const [loading, setLoading] = useState(false);
 
-  /* 🔥 Check existing session */
-  useEffect(() => {
-    const hasCookie = document.cookie.includes("trigga5trey_admin=");
+ /* 🔥 Check existing session */
+useEffect(() => {
+  const checkSession = async () => {
+    try {
+      const res = await fetch("/api/admin-session");
 
-    if (hasCookie) {
-      setAuthed(true);
+      if (res.ok) {
+        setAuthed(true);
+      }
+
+    } catch (err) {
+      console.error(err);
     }
 
     setCheckingAuth(false);
-  }, []);
+  };
+
+  checkSession();
+}, []);
 
   const login = async () => {
     try {
