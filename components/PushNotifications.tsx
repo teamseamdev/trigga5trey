@@ -8,35 +8,30 @@ export default function PushNotifications() {
   const hasInitialized = useRef(false);
 
   const [enabled, setEnabled] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [hidden, setHidden] = useState(false);
 
-  /* 🔥 Check existing notification status */
-  useEffect(() => {
-    const checkPermission = async () => {
-      if (typeof window === "undefined") return;
-
-      const alreadyEnabled =
-        Notification.permission === "granted" ||
-        localStorage.getItem("notifications-enabled") === "true";
-
-      setEnabled(alreadyEnabled);
-      setLoading(false);
-    };
-
-    checkPermission();
-  }, []);
-
-  /* 🔥 Foreground listener */
+  /* 🔥 Always initialize messaging */
   useEffect(() => {
     async function setup() {
       const messaging = await getFirebaseMessaging();
 
       if (!messaging) return;
 
+      /* 🔥 Foreground listener */
       onMessage(messaging, (payload) => {
         console.log("📩 Foreground message:", payload);
       });
+
+      /* 🔥 Check notification state */
+      if (
+        Notification.permission === "granted" ||
+        localStorage.getItem("notifications-enabled") === "true"
+      ) {
+        setEnabled(true);
+
+        /* 🔥 Hide button only */
+        setHidden(true);
+      }
     }
 
     setup();
@@ -45,13 +40,14 @@ export default function PushNotifications() {
   const enablePush = async () => {
     try {
       if (hasInitialized.current) {
+        alert("Notifications already enabled");
         return;
       }
 
       const messaging = await getFirebaseMessaging();
 
       if (!messaging) {
-        alert("Push notifications are not supported on this device.");
+        alert("Push not supported on this device");
         return;
       }
 
@@ -59,7 +55,7 @@ export default function PushNotifications() {
       const permission = await Notification.requestPermission();
 
       if (permission !== "granted") {
-        alert("Notification permission denied.");
+        alert("Permission denied");
         return;
       }
 
@@ -69,7 +65,7 @@ export default function PushNotifications() {
       });
 
       if (!token) {
-        alert("Failed to retrieve push token.");
+        alert("Failed to get token");
         return;
       }
 
@@ -80,25 +76,22 @@ export default function PushNotifications() {
       /* 🔥 SAVE TOKEN */
       await fetch("/api/save-token", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token: clean,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: clean }),
       });
 
-      /* 🔥 Store locally */
       localStorage.setItem("notifications-enabled", "true");
 
       hasInitialized.current = true;
 
-      /* 🔥 Success animation */
-      setShowSuccess(true);
+      setEnabled(true);
 
+      alert("✅ Notifications enabled!");
+
+      /* 🔥 Hide AFTER success */
       setTimeout(() => {
-        setEnabled(true);
-      }, 1500);
+        setHidden(true);
+      }, 1000);
 
     } catch (err) {
       console.error("Push error:", err);
@@ -106,37 +99,15 @@ export default function PushNotifications() {
     }
   };
 
-  /* 🔥 Prevent hydration flicker */
-  if (loading) return null;
-
-  /* 🔥 Hide permanently once enabled */
-  if (enabled) return null;
-
-  /* 🔥 Success state before fade */
-  if (showSuccess) {
-    return (
-      <div
-        style={{
-          padding: "12px 20px",
-          background: "#2ecc71",
-          borderRadius: "8px",
-          color: "#000",
-          fontWeight: 700,
-          textAlign: "center",
-          transition: "all 0.3s ease",
-        }}
-      >
-        🔔 Notifications Enabled
-      </div>
-    );
-  }
+  /* 🔥 Only hide VISUAL button */
+  if (hidden) return null;
 
   return (
     <button
       onClick={enablePush}
       style={{
         padding: "12px 20px",
-        background: "#ff7a00",
+        background: enabled ? "#2ecc71" : "#ff7a00",
         borderRadius: "8px",
         color: "#000",
         fontWeight: 700,
@@ -145,7 +116,7 @@ export default function PushNotifications() {
         transition: "all 0.2s ease",
       }}
     >
-      Enable Notifications 🔔
+      {enabled ? "Notifications Enabled ✅" : "Enable Notifications 🔔"}
     </button>
   );
 }
