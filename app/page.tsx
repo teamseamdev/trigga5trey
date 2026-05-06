@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import { isTwitchLive } from "@/lib/twitch";
 import TwitchPlayer from "@/components/TwitchPlayer";
 import { CSSProperties } from "react";
+import EnableNotifications from "@/components/EnableNotifications";
 
 
 const FORCE_LIVE = false;
@@ -73,25 +74,9 @@ function OfflineHero() {
           </a>
         </div>
 
-        {/* 🔥 ADD BUTTON HERE */}
+        {/* 🔥 THIS WORKS NOW */}
         <div style={{ marginTop: "20px" }}>
-          <button
-            onClick={async () => {
-              const permission = await Notification.requestPermission();
-              alert("Permission: " + permission);
-            }}
-            style={{
-              padding: "12px 20px",
-              background: "#ff7a00",
-              borderRadius: "8px",
-              color: "#000",
-              fontWeight: 700,
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            Enable Notifications 🔔
-          </button>
+          <EnableNotifications />
         </div>
       </div>
     </section>
