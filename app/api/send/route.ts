@@ -1,28 +1,56 @@
 import { NextResponse } from "next/server";
 import admin from "firebase-admin";
 
-// 🔥 Prevent re-init
-if (!admin.apps.length) {
+/* 🔥 LAZY INIT (SAFE FOR NEXT BUILD) */
+function initFirebase() {
+  if (admin.apps.length) return;
+
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
-  if (!privateKey) {
-    throw new Error("FIREBASE_PRIVATE_KEY is missing");
+  if (!projectId || !clientEmail || !privateKey) {
+    console.warn("⚠️ Firebase env vars missing");
+    return;
   }
 
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: privateKey.replace(/\\n/g, "\n"),
-    }),
-  });
+  try {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId,
+        clientEmail,
+        privateKey: privateKey.replace(/\\n/g, "\n"),
+      }),
+    });
+
+    console.log("🔥 Firebase initialized");
+  } catch (err) {
+    console.error("Firebase init error:", err);
+  }
 }
 
+/* 🔥 API ROUTE */
 export async function POST(req: Request) {
   try {
+    initFirebase();
+
+    if (!admin.apps.length) {
+      return NextResponse.json(
+        { error: "Firebase not initialized" },
+        { status: 500 }
+      );
+    }
+
     const { token, title, body } = await req.json();
 
-    await admin.messaging().send({
+    if (!token || !title || !body) {
+      return NextResponse.json(
+        { error: "Missing fields" },
+        { status: 400 }
+      );
+    }
+
+    const response = await admin.messaging().send({
       token,
       notification: {
         title,
@@ -30,14 +58,15 @@ export async function POST(req: Request) {
       },
     });
 
+    console.log("✅ Sent:", response);
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("SEND ERROR:", err);
-    return NextResponse.json({ error: "Failed to send" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Failed to send" },
+      { status: 500 }
+    );
   }
 }
-console.log("ENV CHECK:", {
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  email: process.env.FIREBASE_CLIENT_EMAIL,
-  hasKey: !!process.env.FIREBASE_PRIVATE_KEY,
-});
