@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getToken, onMessage } from "firebase/messaging";
 import { getFirebaseMessaging } from "@/lib/firebase";
 
 export default function PushNotifications() {
   const hasInitialized = useRef(false);
+  const [enabled, setEnabled] = useState(false);
 
-  // 🔥 Setup foreground listener ONCE
+  /* 🔥 Foreground listener (ONLY logs, no duplicates) */
   useEffect(() => {
     async function setup() {
       const messaging = await getFirebaseMessaging();
@@ -23,20 +24,19 @@ export default function PushNotifications() {
 
   const enablePush = async () => {
     try {
-      // 🔥 Prevent multiple runs
       if (hasInitialized.current) {
-        alert("Notifications already enabled on this device");
+        alert("Notifications already enabled");
         return;
       }
 
       const messaging = await getFirebaseMessaging();
 
       if (!messaging) {
-        alert("Push not supported");
+        alert("Push not supported on this device");
         return;
       }
 
-      // 🔥 iOS requires user-triggered request
+      /* 🔥 iOS requires click-trigger */
       const permission = await Notification.requestPermission();
 
       if (permission !== "granted") {
@@ -56,19 +56,19 @@ export default function PushNotifications() {
 
       const clean = token.trim();
 
-      // 🔥 Show clean token for copy
-      prompt("COPY TOKEN (LONG PRESS)", clean);
-
       console.log("🔥 PUSH TOKEN:", clean);
 
-      hasInitialized.current = true;
+      /* 🔥 SAVE TOKEN (THIS IS THE BIG UPGRADE) */
+      await fetch("/api/save-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: clean }),
+      });
 
-      // 🔥 (NEXT STEP) send to backend automatically
-      // await fetch("/api/save-token", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ token: clean }),
-      // });
+      hasInitialized.current = true;
+      setEnabled(true);
+
+      alert("✅ Notifications enabled!");
 
     } catch (err) {
       console.error("Push error:", err);
@@ -81,15 +81,16 @@ export default function PushNotifications() {
       onClick={enablePush}
       style={{
         padding: "12px 20px",
-        background: "#ff7a00",
+        background: enabled ? "#2ecc71" : "#ff7a00",
         borderRadius: "8px",
         color: "#000",
         fontWeight: 700,
         border: "none",
         cursor: "pointer",
+        transition: "all 0.2s ease",
       }}
     >
-      Enable Notifications 🔔
+      {enabled ? "Notifications Enabled ✅" : "Enable Notifications 🔔"}
     </button>
   );
 }
