@@ -1,29 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
   const [password, setPassword] = useState("");
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+
   const [loading, setLoading] = useState(false);
 
-  const login = async () => {
-    const res = await fetch("/api/admin-auth", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ password }),
-    });
+  /* 🔥 Check existing session */
+  useEffect(() => {
+    const hasCookie = document.cookie.includes("trigga5trey_admin=");
 
-    if (res.ok) {
+    if (hasCookie) {
       setAuthed(true);
-    } else {
-      alert("❌ Wrong password");
     }
+
+    setCheckingAuth(false);
+  }, []);
+
+  const login = async () => {
+    try {
+      const res = await fetch("/api/admin-auth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      if (res.ok) {
+        setAuthed(true);
+        setPassword("");
+      } else {
+        alert("❌ Wrong password");
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Login failed");
+    }
+  };
+
+  const logout = () => {
+    document.cookie =
+      "trigga5trey_admin=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+    setAuthed(false);
   };
 
   const sendNotification = async () => {
@@ -34,25 +62,40 @@ export default function AdminPage() {
 
     setLoading(true);
 
-    const res = await fetch("/api/broadcast", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ title, body }),
-    });
+    try {
+      const res = await fetch("/api/broadcast", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          body,
+          url: "/live",
+        }),
+      });
 
-    const data = await res.json();
-    setLoading(false);
+      const data = await res.json();
 
-    if (res.ok) {
-      alert(`✅ Sent to ${data.sent} users`);
-      setTitle("");
-      setBody("");
-    } else {
-      alert("❌ Failed");
+      if (res.ok) {
+        alert(`✅ Sent to ${data.sent} users`);
+
+        setTitle("");
+        setBody("");
+      } else {
+        alert("❌ Failed");
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Send failed");
     }
+
+    setLoading(false);
   };
+
+  /* 🔥 Prevent hydration flicker */
+  if (checkingAuth) return null;
 
   /* 🔒 LOGIN SCREEN */
   if (!authed) {
@@ -78,7 +121,13 @@ export default function AdminPage() {
   /* 📢 ADMIN PANEL */
   return (
     <main style={wrapper}>
-      <h1>📊 Admin Panel</h1>
+      <div style={headerRow}>
+        <h1>📊 Admin Panel</h1>
+
+        <button onClick={logout} style={logoutButton}>
+          Logout
+        </button>
+      </div>
 
       <input
         placeholder="Notification Title"
@@ -91,7 +140,11 @@ export default function AdminPage() {
         placeholder="Notification Message"
         value={body}
         onChange={(e) => setBody(e.target.value)}
-        style={{ ...input, height: 100 }}
+        style={{
+          ...input,
+          height: 120,
+          resize: "none",
+        }}
       />
 
       <button onClick={sendNotification} style={button}>
@@ -114,18 +167,37 @@ const wrapper = {
   color: "#fff",
 };
 
+const headerRow = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+};
+
 const input = {
-  padding: "12px",
-  borderRadius: "8px",
-  border: "1px solid #ccc",
+  padding: "14px",
+  borderRadius: "10px",
+  border: "1px solid #333",
+  background: "#111",
+  color: "#fff",
+  fontSize: "16px",
 };
 
 const button = {
   padding: "14px",
   background: "#ff7a00",
-  borderRadius: "8px",
+  borderRadius: "10px",
   color: "#000",
   fontWeight: 700,
   border: "none",
+  cursor: "pointer",
+  fontSize: "16px",
+};
+
+const logoutButton = {
+  padding: "10px 14px",
+  background: "#222",
+  borderRadius: "8px",
+  color: "#fff",
+  border: "1px solid #333",
   cursor: "pointer",
 };

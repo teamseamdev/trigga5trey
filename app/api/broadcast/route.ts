@@ -17,19 +17,77 @@ const db = admin.firestore();
 /* 🔥 BROADCAST */
 export async function POST(req: Request) {
   try {
-    const { title, body } = await req.json();
+    const { title, body, url } = await req.json();
+
+    if (!title || !body) {
+      return NextResponse.json(
+        { error: "Missing title or body" },
+        { status: 400 }
+      );
+    }
 
     const snapshot = await db.collection("tokens").get();
 
-    const tokens: string[] = snapshot.docs.map((doc) => doc.id);
+    const tokens: string[] = snapshot.docs.map((doc) =>
+      doc.id
+        .trim()
+        .replace(/\s+/g, "")
+        .replace(/[^\x00-\x7F]/g, "")
+    );
 
     if (!tokens.length) {
-      return NextResponse.json({ error: "No users" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No users" },
+        { status: 400 }
+      );
     }
 
     const response = await admin.messaging().sendEachForMulticast({
       tokens,
-      notification: { title, body },
+
+      notification: {
+        title,
+        body,
+      },
+
+      /* 🔥 Deep linking */
+      data: {
+        url: url || "/",
+      },
+
+      webpush: {
+        notification: {
+          icon: "/icon-512.png",
+          badge: "/badge.png",
+        },
+
+        fcmOptions: {
+          link: url || "/",
+        },
+      },
+    });
+
+    /* 🔥 Cleanup invalid tokens */
+    response.responses.forEach(async (resp, idx) => {
+      if (!resp.success) {
+        console.log("❌ Removing invalid token:", tokens[idx]);
+
+        try {
+          await db.collection("tokens").doc(tokens[idx]).delete();
+        } catch (deleteErr) {
+          console.error("Token delete error:", deleteErr);
+        }
+      }
+    });
+
+    /* 🔥 Analytics log */
+    await db.collection("notifications").add({
+      title,
+      body,
+      url: url || "/",
+      sent: response.successCount,
+      failed: response.failureCount,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     console.log("📢 Sent to:", response.successCount);
@@ -37,9 +95,15 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       sent: response.successCount,
+      failed: response.failureCount,
     });
+
   } catch (err) {
     console.error("BROADCAST ERROR:", err);
-    return NextResponse.json({ error: "Failed" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Failed" },
+      { status: 500 }
+    );
   }
 }

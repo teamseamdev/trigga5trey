@@ -9,4 +9,32 @@ firebase.initializeApp({
   appId: "1:576191455630:web:4c9a7e99ed1d4f1edbc4df",
 });
 
-firebase.messaging(); // ✅ NOTHING ELSE
+const messaging = firebase.messaging();
+
+/* 🔥 Handle notification clicks */
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const url = event.notification?.data?.url || "/";
+
+  event.waitUntil(
+    clients.matchAll({
+      type: "window",
+      includeUncontrolled: true,
+    }).then((clientList) => {
+
+      /* 🔥 Focus existing window */
+      for (const client of clientList) {
+        if ("focus" in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+
+      /* 🔥 Open new window */
+      if (clients.openWindow) {
+        return clients.openWindow(url);
+      }
+    })
+  );
+});

@@ -15,6 +15,7 @@ function initFirebase() {
       clientEmail: !!clientEmail,
       privateKey: !!privateKey,
     });
+
     return;
   }
 
@@ -49,13 +50,13 @@ export async function POST(req: Request) {
 
     console.log("📨 Incoming request:", data);
 
-    let { token, title, body } = data;
+    let { token, title, body, url } = data;
 
-    // 🔥 HARD CLEAN TOKEN (fixes copy/paste + unicode issues)
+    /* 🔥 HARD CLEAN TOKEN */
     token = (token || "")
       .trim()
-      .replace(/\s+/g, "") // remove spaces/newlines
-      .replace(/[^\x00-\x7F]/g, ""); // remove weird unicode chars
+      .replace(/\s+/g, "")
+      .replace(/[^\x00-\x7F]/g, "");
 
     if (!token || !title || !body) {
       return NextResponse.json(
@@ -66,15 +67,36 @@ export async function POST(req: Request) {
 
     const response = await admin.messaging().send({
       token,
+
       notification: {
         title,
         body,
+      },
+
+      /* 🔥 Deep linking */
+      data: {
+        url: url || "/",
+      },
+
+      webpush: {
+        notification: {
+          icon: "/icon-512.png",
+          badge: "/badge.png",
+        },
+
+        fcmOptions: {
+          link: url || "/",
+        },
       },
     });
 
     console.log("✅ Sent successfully:", response);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      response,
+    });
+
   } catch (err: any) {
     console.error("🔥 SEND ERROR:", err?.message || err);
 

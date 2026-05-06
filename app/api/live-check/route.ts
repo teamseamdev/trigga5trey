@@ -15,40 +15,140 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-// 🔥 Prevent spam (memory cache)
-let wasLive = false;
-
+/* 🔥 LIVE CHECK */
 export async function GET() {
   try {
     const live = await isTwitchLive("trigga5trey");
 
-    if (live && !wasLive) {
-      wasLive = true;
+    /* 🔥 STREAM STATUS DOC */
+    const statusRef = db.collection("streamStatus").doc("main");
 
-      // 🔥 GET TOKENS
+    const statusSnap = await statusRef.get();
+
+    const previousData = statusSnap.exists
+      ? statusSnap.data()
+      : { isLive: false };
+
+    const wasLive = previousData?.isLive || false;
+
+    console.log("📡 Twitch live:", live);
+    console.log("📡 Previous live:", wasLive);
+
+    /* 🔥 JUST WENT LIVE */
+    if (live && !wasLive) {
+      console.log("🚀 Stream went LIVE");
+
       const snapshot = await db.collection("tokens").get();
-      const tokens = snapshot.docs.map((doc) => doc.id);
+
+      const tokens: string[] = snapshot.docs.map((doc) =>
+        doc.id
+          .trim()
+          .replace(/\s+/g, "")
+          .replace(/[^\x00-\x7F]/g, "")
+      );
 
       if (tokens.length) {
-        await admin.messaging().sendEachForMulticast({
-          tokens,
-          notification: {
-            title: "🔴 LIVE NOW",
-            body: "Trigga5Trey just went live 🚀",
-          },
+        const response = await admin
+          .messaging()
+          .sendEachForMulticast({
+            tokens,
+
+            notification: {
+              title: "🔴 LIVE NOW",
+              body: "Trigga5Trey just went live 🚀",
+            },
+
+            /* 🔥 Deep link */
+            data: {
+              url: "/live",
+            },
+
+            webpush: {
+              notification: {
+                icon: "/icon-512.png",
+                badge: "/badge.png",
+              },
+
+              fcmOptions: {
+                link: "/live",
+              },
+            },
+          });
+
+        console.log(
+          `📢 LIVE notification sent to ${response.successCount} users`
+        );
+
+        /* 🔥 Cleanup invalid tokens */
+        response.responses.forEach(async (resp, idx) => {
+          if (!resp.success) {
+            console.log("❌ Removing invalid token:", tokens[idx]);
+
+            try {
+              await db.collection("tokens").doc(tokens[idx]).delete();
+            } catch (deleteErr) {
+              console.error("Token delete error:", deleteErr);
+            }
+          }
         });
 
-        console.log("🚀 LIVE notification sent");
+        /* 🔥 Analytics */
+        await db.collection("notifications").add({
+          type: "live",
+          title: "🔴 LIVE NOW",
+          body: "Trigga5Trey just went live 🚀",
+          sent: response.successCount,
+          failed: response.failureCount,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        /* 🔥 Activity feed */
+        await db.collection("activity").add({
+          type: "live",
+          message: "Trigga5Trey is LIVE 🔴",
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
       }
     }
 
-    if (!live) {
-      wasLive = false;
+    /* 🔥 STREAM ENDED */
+    if (!live && wasLive) {
+      console.log("⚫ Stream ended");
+
+      await db.collection("activity").add({
+        type: "offline",
+        message: "Trigga5Trey stream ended",
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
     }
 
-    return NextResponse.json({ live });
+    /* 🔥 UPDATE STATUS */
+    await statusRef.set({
+      isLive: live,
+
+      lastChecked:
+        admin.firestore.FieldValue.serverTimestamp(),
+
+      lastLiveAt: live
+        ? admin.firestore.FieldValue.serverTimestamp()
+        : previousData?.lastLiveAt || null,
+    });
+
+    return NextResponse.json({
+      success: true,
+      live,
+      previousLiveState: wasLive,
+    });
+
   } catch (err) {
     console.error("LIVE CHECK ERROR:", err);
-    return NextResponse.json({ error: "Failed" }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed",
+      },
+      { status: 500 }
+    );
   }
 }
