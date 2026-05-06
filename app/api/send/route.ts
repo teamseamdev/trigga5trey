@@ -10,7 +10,11 @@ function initFirebase() {
   const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
   if (!projectId || !clientEmail || !privateKey) {
-    console.warn("⚠️ Firebase env vars missing");
+    console.warn("⚠️ Missing Firebase env vars", {
+      projectId: !!projectId,
+      clientEmail: !!clientEmail,
+      privateKey: !!privateKey,
+    });
     return;
   }
 
@@ -25,7 +29,7 @@ function initFirebase() {
 
     console.log("🔥 Firebase initialized");
   } catch (err) {
-    console.error("Firebase init error:", err);
+    console.error("❌ Firebase init error:", err);
   }
 }
 
@@ -41,7 +45,17 @@ export async function POST(req: Request) {
       );
     }
 
-    const { token, title, body } = await req.json();
+    const data = await req.json();
+
+    console.log("📨 Incoming request:", data);
+
+    let { token, title, body } = data;
+
+    // 🔥 HARD CLEAN TOKEN (fixes copy/paste + unicode issues)
+    token = (token || "")
+      .trim()
+      .replace(/\s+/g, "") // remove spaces/newlines
+      .replace(/[^\x00-\x7F]/g, ""); // remove weird unicode chars
 
     if (!token || !title || !body) {
       return NextResponse.json(
@@ -58,14 +72,17 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log("✅ Sent:", response);
+    console.log("✅ Sent successfully:", response);
 
     return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("SEND ERROR:", err);
+  } catch (err: any) {
+    console.error("🔥 SEND ERROR:", err?.message || err);
 
     return NextResponse.json(
-      { error: "Failed to send" },
+      {
+        error: "Failed to send",
+        details: err?.message || "Unknown error",
+      },
       { status: 500 }
     );
   }

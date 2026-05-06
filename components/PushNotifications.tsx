@@ -25,7 +25,7 @@ export default function PushNotifications() {
         vapidKey: "BNuJ8PIqjB4vxPIpRtz26judiC3T9Cy_AbAXaZNY8EyoHVvpGtiV9A-zgQ6nOPFHYBFKKvvmRbS0MOzVlgNn4yE",
       });
 
-      alert("🔥 TOKEN:\n\n" + token);
+      prompt("COPY TOKEN", token || "");
       console.log("🔥 PUSH TOKEN:", token);
 
       // 🔥 Foreground notifications
