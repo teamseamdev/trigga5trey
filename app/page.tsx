@@ -72,28 +72,31 @@ function OfflineHero() {
             Join Discord
           </a>
         </div>
+
+        {/* 🔥 ADD BUTTON HERE */}
+        <div style={{ marginTop: "20px" }}>
+          <button
+            onClick={async () => {
+              const permission = await Notification.requestPermission();
+              alert("Permission: " + permission);
+            }}
+            style={{
+              padding: "12px 20px",
+              background: "#ff7a00",
+              borderRadius: "8px",
+              color: "#000",
+              fontWeight: 700,
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            Enable Notifications 🔔
+          </button>
+        </div>
       </div>
     </section>
-    
   );
 }
-
-<button
-  onClick={async () => {
-    const permission = await Notification.requestPermission();
-
-    alert("Permission: " + permission);
-  }}
-  style={{
-    padding: "12px 20px",
-    background: "#ff7a00",
-    borderRadius: "8px",
-    color: "#000",
-    fontWeight: 700,
-  }}
->
-  Enable Notifications 🔔
-</button>
 
 
 /* 🔥 STYLES (TYPE SAFE) */
