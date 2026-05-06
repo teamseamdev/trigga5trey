@@ -1,20 +1,7 @@
 import { NextResponse } from "next/server";
 import admin from "firebase-admin";
-import fs from "fs";
-import path from "path";
 
-const filePath = path.join(process.cwd(), "tokens.json");
-
-function getTokens(): string[] {
-  try {
-    const data = fs.readFileSync(filePath, "utf-8");
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
-
-// 🔥 init firebase (reuse your logic)
+/* 🔥 INIT */
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
@@ -25,22 +12,34 @@ if (!admin.apps.length) {
   });
 }
 
+const db = admin.firestore();
+
+/* 🔥 BROADCAST */
 export async function POST(req: Request) {
-  const { title, body } = await req.json();
+  try {
+    const { title, body } = await req.json();
 
-  const tokens = getTokens();
+    const snapshot = await db.collection("tokens").get();
 
-  if (!tokens.length) {
-    return NextResponse.json({ error: "No users" }, { status: 400 });
+    const tokens: string[] = snapshot.docs.map((doc) => doc.id);
+
+    if (!tokens.length) {
+      return NextResponse.json({ error: "No users" }, { status: 400 });
+    }
+
+    const response = await admin.messaging().sendEachForMulticast({
+      tokens,
+      notification: { title, body },
+    });
+
+    console.log("📢 Sent to:", response.successCount);
+
+    return NextResponse.json({
+      success: true,
+      sent: response.successCount,
+    });
+  } catch (err) {
+    console.error("BROADCAST ERROR:", err);
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
-
-  const response = await admin.messaging().sendEachForMulticast({
-    tokens,
-    notification: { title, body },
-  });
-
-  return NextResponse.json({
-    success: true,
-    sent: response.successCount,
-  });
 }

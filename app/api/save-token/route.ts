@@ -1,35 +1,38 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import admin from "firebase-admin";
 
-const filePath = path.join(process.cwd(), "tokens.json");
-
-function getTokens(): string[] {
-  try {
-    const data = fs.readFileSync(filePath, "utf-8");
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
+/* 🔥 INIT */
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    }),
+  });
 }
 
-function saveTokens(tokens: string[]) {
-  fs.writeFileSync(filePath, JSON.stringify(tokens, null, 2));
-}
+const db = admin.firestore();
 
+/* 🔥 SAVE TOKEN */
 export async function POST(req: Request) {
-  const { token } = await req.json();
+  try {
+    const { token } = await req.json();
 
-  if (!token) {
-    return NextResponse.json({ error: "No token" }, { status: 400 });
+    if (!token) {
+      return NextResponse.json({ error: "No token" }, { status: 400 });
+    }
+
+    await db.collection("tokens").doc(token).set({
+      token,
+      createdAt: Date.now(),
+    });
+
+    console.log("💾 Saved token:", token);
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("SAVE TOKEN ERROR:", err);
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
-
-  const tokens = getTokens();
-
-  if (!tokens.includes(token)) {
-    tokens.push(token);
-    saveTokens(tokens);
-  }
-
-  return NextResponse.json({ success: true });
 }
