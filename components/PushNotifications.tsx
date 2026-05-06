@@ -27,7 +27,7 @@ export default function PushNotifications() {
         const token = await getToken(messaging, {
           vapidKey: "BNuJ8PIqjB4vxPIpRtz26judiC3T9Cy_AbAXaZNY8EyoHVvpGtiV9A-zgQ6nOPFHYBFKKvvmRbS0MOzVlgNn4yE",
         });
-
+        alert("TOKEN: " + token);
         console.log("🔥 PUSH TOKEN:", token);
 
         // 🔥 OPTIONAL (NEXT STEP): send token to backend
