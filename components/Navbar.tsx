@@ -6,87 +6,71 @@ import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+
   const pathname = usePathname();
 
   const handleNavClick = () => setOpen(false);
 
   return (
-    <header
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
-        background: "rgba(0,0,0,0.8)",
-        backdropFilter: "blur(10px)",
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: "15px 25px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        {/* LOGO */}
-        <a
-          href="/"
-          style={{
-            color: "#fff",
-            textDecoration: "none",
-            fontWeight: 700,
-            letterSpacing: "2px",
-          }}
-        >
+    <header style={header}>
+      <div style={navWrapper}>
+        <a href="/" style={logo}>
           TRIGGA5TREY
         </a>
 
-        {/* DESKTOP NAV */}
         <nav className="desktop-nav">
           <NavLink href="/" label="Home" active={pathname === "/"} />
-          <NavLink href="/socials" label="Socials" active={pathname === "/socials"} />
-          <NavLink href="/shop" label="Shop" active={pathname === "/shop"} />
-
-          {/* 🔥 ADMIN LINK */}
-          <NavLink href="/admin" label="Admin" active={pathname === "/admin"} />
+          <NavLink
+            href="/socials"
+            label="Socials"
+            active={pathname === "/socials"}
+          />
+          <NavLink
+            href="/shop"
+            label="Shop"
+            active={pathname === "/shop"}
+          />
+          <NavLink
+            href="/admin"
+            label="Admin"
+            active={pathname === "/admin"}
+          />
         </nav>
 
-        {/* MOBILE BUTTON */}
         <button
           onClick={() => setOpen(!open)}
-          style={{
-            background: "none",
-            border: "none",
-            color: "#fff",
-            cursor: "pointer",
-          }}
+          style={mobileButton}
           className="mobile-menu-btn"
         >
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
-      {/* MOBILE MENU */}
       {open && (
-        <div
-          style={{
-            background: "#000",
-            borderTop: "1px solid rgba(255,255,255,0.08)",
-            padding: "20px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "15px",
-          }}
-        >
-          <MobileLink href="/" label="Home" onClick={handleNavClick} />
-          <MobileLink href="/socials" label="Socials" onClick={handleNavClick} />
-          <MobileLink href="/shop" label="Shop" onClick={handleNavClick} />
+        <div style={mobileMenu}>
+          <MobileLink
+            href="/"
+            label="Home"
+            onClick={handleNavClick}
+          />
 
-          {/* 🔥 ADMIN LINK */}
-          <MobileLink href="/admin" label="Admin" onClick={handleNavClick} />
+          <MobileLink
+            href="/socials"
+            label="Socials"
+            onClick={handleNavClick}
+          />
+
+          <MobileLink
+            href="/shop"
+            label="Shop"
+            onClick={handleNavClick}
+          />
+
+          <MobileLink
+            href="/admin"
+            label="Admin"
+            onClick={handleNavClick}
+          />
         </div>
       )}
 
@@ -94,7 +78,8 @@ export default function Navbar() {
         {`
           .desktop-nav {
             display: flex;
-            gap: 25px;
+            gap: 28px;
+            align-items: center;
           }
 
           .mobile-menu-btn {
@@ -116,8 +101,6 @@ export default function Navbar() {
   );
 }
 
-/* 🔥 COMPONENTS */
-
 function NavLink({
   href,
   label,
@@ -131,15 +114,17 @@ function NavLink({
     <a
       href={href}
       style={{
-        color: active ? "#fff" : "#aaa",
+        color: active ? "#fff" : "#8d8d8d",
         textDecoration: "none",
-        fontSize: "0.9rem",
-        transition: "0.2s",
+        fontWeight: active ? 700 : 500,
+        transition: "0.2s ease",
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
-      onMouseLeave={(e) =>
-        (e.currentTarget.style.color = active ? "#fff" : "#aaa")
-      }
+      onMouseEnter={(e) => {
+        e.currentTarget.style.color = "#fff";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.color = active ? "#fff" : "#8d8d8d";
+      }}
     >
       {label}
     </a>
@@ -163,9 +148,52 @@ function MobileLink({
         color: "#fff",
         textDecoration: "none",
         fontSize: "1.1rem",
+        fontWeight: 600,
       }}
     >
       {label}
     </a>
   );
 }
+
+const header = {
+  position: "sticky" as const,
+  top: 0,
+  zIndex: 100,
+  background: "rgba(0,0,0,0.65)",
+  backdropFilter: "blur(18px)",
+  borderBottom: "1px solid rgba(255,255,255,0.06)",
+};
+
+const navWrapper = {
+  maxWidth: "1250px",
+  margin: "0 auto",
+  padding: "18px 24px",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+};
+
+const logo = {
+  color: "#fff",
+  textDecoration: "none",
+  fontWeight: 900,
+  letterSpacing: "3px",
+  fontSize: "1rem",
+};
+
+const mobileButton = {
+  background: "transparent",
+  border: "none",
+  color: "#fff",
+  cursor: "pointer",
+};
+
+const mobileMenu = {
+  background: "rgba(0,0,0,0.96)",
+  borderTop: "1px solid rgba(255,255,255,0.08)",
+  padding: "25px",
+  display: "flex",
+  flexDirection: "column" as const,
+  gap: "18px",
+};
