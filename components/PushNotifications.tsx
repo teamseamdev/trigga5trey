@@ -6,12 +6,32 @@ import { getFirebaseMessaging } from "@/lib/firebase";
 
 export default function PushNotifications() {
   const hasInitialized = useRef(false);
-  const [enabled, setEnabled] = useState(false);
 
-  /* 🔥 Foreground listener (ONLY logs, no duplicates) */
+  const [enabled, setEnabled] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  /* 🔥 Check existing notification status */
+  useEffect(() => {
+    const checkPermission = async () => {
+      if (typeof window === "undefined") return;
+
+      const alreadyEnabled =
+        Notification.permission === "granted" ||
+        localStorage.getItem("notifications-enabled") === "true";
+
+      setEnabled(alreadyEnabled);
+      setLoading(false);
+    };
+
+    checkPermission();
+  }, []);
+
+  /* 🔥 Foreground listener */
   useEffect(() => {
     async function setup() {
       const messaging = await getFirebaseMessaging();
+
       if (!messaging) return;
 
       onMessage(messaging, (payload) => {
@@ -25,14 +45,13 @@ export default function PushNotifications() {
   const enablePush = async () => {
     try {
       if (hasInitialized.current) {
-        alert("Notifications already enabled");
         return;
       }
 
       const messaging = await getFirebaseMessaging();
 
       if (!messaging) {
-        alert("Push not supported on this device");
+        alert("Push notifications are not supported on this device.");
         return;
       }
 
@@ -40,7 +59,7 @@ export default function PushNotifications() {
       const permission = await Notification.requestPermission();
 
       if (permission !== "granted") {
-        alert("Permission denied");
+        alert("Notification permission denied.");
         return;
       }
 
@@ -50,7 +69,7 @@ export default function PushNotifications() {
       });
 
       if (!token) {
-        alert("Failed to get token");
+        alert("Failed to retrieve push token.");
         return;
       }
 
@@ -58,17 +77,28 @@ export default function PushNotifications() {
 
       console.log("🔥 PUSH TOKEN:", clean);
 
-      /* 🔥 SAVE TOKEN (THIS IS THE BIG UPGRADE) */
+      /* 🔥 SAVE TOKEN */
       await fetch("/api/save-token", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: clean }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          token: clean,
+        }),
       });
 
-      hasInitialized.current = true;
-      setEnabled(true);
+      /* 🔥 Store locally */
+      localStorage.setItem("notifications-enabled", "true");
 
-      alert("✅ Notifications enabled!");
+      hasInitialized.current = true;
+
+      /* 🔥 Success animation */
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setEnabled(true);
+      }, 1500);
 
     } catch (err) {
       console.error("Push error:", err);
@@ -76,12 +106,37 @@ export default function PushNotifications() {
     }
   };
 
+  /* 🔥 Prevent hydration flicker */
+  if (loading) return null;
+
+  /* 🔥 Hide permanently once enabled */
+  if (enabled) return null;
+
+  /* 🔥 Success state before fade */
+  if (showSuccess) {
+    return (
+      <div
+        style={{
+          padding: "12px 20px",
+          background: "#2ecc71",
+          borderRadius: "8px",
+          color: "#000",
+          fontWeight: 700,
+          textAlign: "center",
+          transition: "all 0.3s ease",
+        }}
+      >
+        🔔 Notifications Enabled
+      </div>
+    );
+  }
+
   return (
     <button
       onClick={enablePush}
       style={{
         padding: "12px 20px",
-        background: enabled ? "#2ecc71" : "#ff7a00",
+        background: "#ff7a00",
         borderRadius: "8px",
         color: "#000",
         fontWeight: 700,
@@ -90,7 +145,7 @@ export default function PushNotifications() {
         transition: "all 0.2s ease",
       }}
     >
-      {enabled ? "Notifications Enabled ✅" : "Enable Notifications 🔔"}
+      Enable Notifications 🔔
     </button>
   );
 }
