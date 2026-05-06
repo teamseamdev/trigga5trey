@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { isTwitchLive } from "@/lib/twitch";
 import TwitchPlayer from "@/components/TwitchPlayer";
 import { CSSProperties } from "react";

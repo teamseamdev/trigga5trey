@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import InstallButton from "@/components/InstallButton";
+import PushNotifications from "@/components/PushNotifications";
+
+<PushNotifications />
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -89,6 +92,7 @@ export default function RootLayout({
           <Navbar />
           {children}
           <InstallButton />
+          <PushNotifications />
         </div>
       </body>
     </html>
