@@ -1,11 +1,34 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { getToken, onMessage } from "firebase/messaging";
 import { getFirebaseMessaging } from "@/lib/firebase";
 
 export default function PushNotifications() {
+  const hasInitialized = useRef(false);
+
+  // 🔥 Setup foreground listener ONCE
+  useEffect(() => {
+    async function setup() {
+      const messaging = await getFirebaseMessaging();
+      if (!messaging) return;
+
+      onMessage(messaging, (payload) => {
+        console.log("📩 Foreground message:", payload);
+      });
+    }
+
+    setup();
+  }, []);
+
   const enablePush = async () => {
     try {
+      // 🔥 Prevent multiple runs
+      if (hasInitialized.current) {
+        alert("Notifications already enabled on this device");
+        return;
+      }
+
       const messaging = await getFirebaseMessaging();
 
       if (!messaging) {
@@ -13,7 +36,7 @@ export default function PushNotifications() {
         return;
       }
 
-      // 🔥 MUST be user-triggered on iOS
+      // 🔥 iOS requires user-triggered request
       const permission = await Notification.requestPermission();
 
       if (permission !== "granted") {
@@ -22,24 +45,30 @@ export default function PushNotifications() {
       }
 
       const token = await getToken(messaging, {
-        vapidKey: "BNuJ8PIqjB4vxPIpRtz26judiC3T9Cy_AbAXaZNY8EyoHVvpGtiV9A-zgQ6nOPFHYBFKKvvmRbS0MOzVlgNn4yE",
+        vapidKey:
+          "BNuJ8PIqjB4vxPIpRtz26judiC3T9Cy_AbAXaZNY8EyoHVvpGtiV9A-zgQ6nOPFHYBFKKvvmRbS0MOzVlgNn4yE",
       });
 
-      const clean = token?.trim() || "";
-prompt("COPY TOKEN (LONG PRESS)", clean);
-      console.log("🔥 PUSH TOKEN:", token);
+      if (!token) {
+        alert("Failed to get token");
+        return;
+      }
 
-      // 🔥 Foreground notifications
-      onMessage(messaging, (payload) => {
-        const title = payload.notification?.title || "Notification";
+      const clean = token.trim();
 
-        navigator.serviceWorker.ready.then((registration) => {
-          registration.showNotification(title, {
-            body: payload.notification?.body,
-            icon: "/icon-192.png",
-          });
-        });
-      });
+      // 🔥 Show clean token for copy
+      prompt("COPY TOKEN (LONG PRESS)", clean);
+
+      console.log("🔥 PUSH TOKEN:", clean);
+
+      hasInitialized.current = true;
+
+      // 🔥 (NEXT STEP) send to backend automatically
+      // await fetch("/api/save-token", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ token: clean }),
+      // });
 
     } catch (err) {
       console.error("Push error:", err);

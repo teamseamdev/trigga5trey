@@ -3,9 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import InstallButton from "@/components/InstallButton";
-import PushNotifications from "@/components/PushNotifications";
-
-<PushNotifications />
+// ❌ removed PushNotifications import
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,7 +37,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* 🔥 iOS APP MODE */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta
           name="apple-mobile-web-app-status-bar-style"
@@ -47,23 +44,18 @@ export default function RootLayout({
         />
         <meta name="apple-mobile-web-app-title" content="TRIGGA5TREY" />
 
-        {/* 🔥 REAL iOS SPLASH SCREENS (DEVICE MATCHED) */}
-
-        {/* iPhone 14 / 15 */}
         <link
           rel="apple-touch-startup-image"
           href="/splash-1170x2532.png"
           media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)"
         />
 
-        {/* iPhone 14 Pro */}
         <link
           rel="apple-touch-startup-image"
           href="/splash-1179x2556.png"
           media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)"
         />
 
-        {/* iPhone 14 Pro Max / 15 Pro Max */}
         <link
           rel="apple-touch-startup-image"
           href="/splash-1290x2796.png"
@@ -82,7 +74,6 @@ export default function RootLayout({
           backgroundAttachment: "fixed",
         }}
       >
-        {/* 🔥 GLOBAL OVERLAY */}
         <div
           style={{
             minHeight: "100vh",
@@ -92,7 +83,6 @@ export default function RootLayout({
           <Navbar />
           {children}
           <InstallButton />
-          <PushNotifications />
         </div>
       </body>
     </html>
