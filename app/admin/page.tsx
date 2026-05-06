@@ -105,11 +105,12 @@ export default function AdminPage() {
 
 const wrapper = {
   maxWidth: "500px",
-  margin: "100px auto",
+  margin: "0 auto",
+  minHeight: "100vh",
+  padding: "80px 20px 40px",
   display: "flex",
   flexDirection: "column" as const,
   gap: "15px",
-  padding: "20px",
   color: "#fff",
 };
 

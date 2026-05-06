@@ -8,6 +8,8 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
+  const handleNavClick = () => setOpen(false);
+
   return (
     <header
       style={{
@@ -44,25 +46,15 @@ export default function Navbar() {
 
         {/* DESKTOP NAV */}
         <nav className="desktop-nav">
-          <a href="/" style={link(pathname === "/")}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
-  onMouseLeave={(e) => (e.currentTarget.style.color = "#aaa")}
-  >
-            Home
-          </a>
-          <a href="/socials" style={link(pathname === "/socials")}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
-  onMouseLeave={(e) => (e.currentTarget.style.color = "#aaa")}>
-            Socials
-          </a>
-          <a href="/shop" style={link(pathname === "/shop")}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
-  onMouseLeave={(e) => (e.currentTarget.style.color = "#aaa")}>
-            Shop
-          </a>
+          <NavLink href="/" label="Home" active={pathname === "/"} />
+          <NavLink href="/socials" label="Socials" active={pathname === "/socials"} />
+          <NavLink href="/shop" label="Shop" active={pathname === "/shop"} />
+
+          {/* 🔥 ADMIN LINK */}
+          <NavLink href="/admin" label="Admin" active={pathname === "/admin"} />
         </nav>
 
-        {/* MOBILE MENU BUTTON */}
+        {/* MOBILE BUTTON */}
         <button
           onClick={() => setOpen(!open)}
           style={{
@@ -77,7 +69,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* MOBILE DROPDOWN */}
+      {/* MOBILE MENU */}
       {open && (
         <div
           style={{
@@ -89,19 +81,15 @@ export default function Navbar() {
             gap: "15px",
           }}
         >
-          <a href="/" style={mobileLink}>
-            Home
-          </a>
-          <a href="/socials" style={mobileLink}>
-            Socials
-          </a>
-          <a href="/shop" style={mobileLink}>
-            Shop
-          </a>
+          <MobileLink href="/" label="Home" onClick={handleNavClick} />
+          <MobileLink href="/socials" label="Socials" onClick={handleNavClick} />
+          <MobileLink href="/shop" label="Shop" onClick={handleNavClick} />
+
+          {/* 🔥 ADMIN LINK */}
+          <MobileLink href="/admin" label="Admin" onClick={handleNavClick} />
         </div>
       )}
 
-      {/* RESPONSIVE STYLES */}
       <style>
         {`
           .desktop-nav {
@@ -128,16 +116,56 @@ export default function Navbar() {
   );
 }
 
-/* STYLES */
-const link = (active: boolean) => ({
-  color: active ? "#fff" : "#aaa",
-  textDecoration: "none",
-  fontSize: "0.9rem",
-  transition: "0.2s",
-});
+/* 🔥 COMPONENTS */
 
-const mobileLink = {
-  color: "#fff",
-  textDecoration: "none",
-  fontSize: "1.1rem",
-};
+function NavLink({
+  href,
+  label,
+  active,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+}) {
+  return (
+    <a
+      href={href}
+      style={{
+        color: active ? "#fff" : "#aaa",
+        textDecoration: "none",
+        fontSize: "0.9rem",
+        transition: "0.2s",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
+      onMouseLeave={(e) =>
+        (e.currentTarget.style.color = active ? "#fff" : "#aaa")
+      }
+    >
+      {label}
+    </a>
+  );
+}
+
+function MobileLink({
+  href,
+  label,
+  onClick,
+}: {
+  href: string;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <a
+      href={href}
+      onClick={onClick}
+      style={{
+        color: "#fff",
+        textDecoration: "none",
+        fontSize: "1.1rem",
+      }}
+    >
+      {label}
+    </a>
+  );
+}
