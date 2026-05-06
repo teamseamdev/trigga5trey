@@ -36,6 +36,7 @@ useEffect(() => {
   const login = async () => {
     try {
       const res = await fetch("/api/admin-auth", {
+  credentials: "include",
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,6 +74,7 @@ useEffect(() => {
 
     try {
       const res = await fetch("/api/broadcast", {
+  credentials: "include",
         method: "POST",
         headers: {
           "Content-Type": "application/json",
