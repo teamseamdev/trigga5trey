@@ -78,14 +78,14 @@ export async function POST(req: Request) {
         url: url || "/",
       },
 
+      /* 🔥 iOS-safe webpush */
       webpush: {
-        notification: {
-          icon: "/icon-512.png",
-          badge: "/badge.png",
+        headers: {
+          Urgency: "high",
         },
 
-        fcmOptions: {
-          link: url || "/",
+        notification: {
+          icon: "/icon-512.png",
         },
       },
     });
