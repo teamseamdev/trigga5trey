@@ -3,9 +3,28 @@
 import { useState } from "react";
 
 export default function AdminPage() {
+  const [authed, setAuthed] = useState(false);
+  const [password, setPassword] = useState("");
+
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const login = async () => {
+    const res = await fetch("/api/admin-auth", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ password }),
+    });
+
+    if (res.ok) {
+      setAuthed(true);
+    } else {
+      alert("❌ Wrong password");
+    }
+  };
 
   const sendNotification = async () => {
     if (!title || !body) {
@@ -24,7 +43,6 @@ export default function AdminPage() {
     });
 
     const data = await res.json();
-
     setLoading(false);
 
     if (res.ok) {
@@ -33,13 +51,34 @@ export default function AdminPage() {
       setBody("");
     } else {
       alert("❌ Failed");
-      console.error(data);
     }
   };
 
+  /* 🔒 LOGIN SCREEN */
+  if (!authed) {
+    return (
+      <main style={wrapper}>
+        <h1>🔒 Admin Login</h1>
+
+        <input
+          type="password"
+          placeholder="Enter password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={input}
+        />
+
+        <button onClick={login} style={button}>
+          Login
+        </button>
+      </main>
+    );
+  }
+
+  /* 📢 ADMIN PANEL */
   return (
     <main style={wrapper}>
-      <h1 style={{ marginBottom: 20 }}>📊 Admin Panel</h1>
+      <h1>📊 Admin Panel</h1>
 
       <input
         placeholder="Notification Title"
@@ -62,6 +101,8 @@ export default function AdminPage() {
   );
 }
 
+/* 🔥 STYLES */
+
 const wrapper = {
   maxWidth: "500px",
   margin: "100px auto",
@@ -69,6 +110,7 @@ const wrapper = {
   flexDirection: "column" as const,
   gap: "15px",
   padding: "20px",
+  color: "#fff",
 };
 
 const input = {
