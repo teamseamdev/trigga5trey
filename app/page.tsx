@@ -1,9 +1,9 @@
 export const dynamic = "force-dynamic";
+
 import { isTwitchLive } from "@/lib/twitch";
 import TwitchPlayer from "@/components/TwitchPlayer";
 import { CSSProperties } from "react";
-import EnableNotifications from "@/components/EnableNotifications";
-
+import PushNotifications from "@/components/PushNotifications"; // ✅ ONLY THIS
 
 const FORCE_LIVE = false;
 
@@ -24,7 +24,6 @@ function LiveView() {
       <TwitchPlayer channel="trigga5trey" />
 
       <div style={overlay} />
-
       <div style={liveBadge}>LIVE</div>
 
       <div style={buttons}>
@@ -74,17 +73,16 @@ function OfflineHero() {
           </a>
         </div>
 
-        {/* 🔥 THIS WORKS NOW */}
+        {/* 🔥 REAL PUSH BUTTON (FIXED) */}
         <div style={{ marginTop: "20px" }}>
-          <EnableNotifications />
+          <PushNotifications />
         </div>
       </div>
     </section>
   );
 }
 
-
-/* 🔥 STYLES (TYPE SAFE) */
+/* 🔥 STYLES */
 
 const main: CSSProperties = {
   color: "#fff",

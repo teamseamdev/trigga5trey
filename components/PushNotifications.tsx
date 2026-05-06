@@ -1,66 +1,65 @@
 "use client";
 
-import { useEffect } from "react";
 import { getToken, onMessage } from "firebase/messaging";
 import { getFirebaseMessaging } from "@/lib/firebase";
 
 export default function PushNotifications() {
-  useEffect(() => {
-    async function init() {
-      try {
-        const messaging = await getFirebaseMessaging();
+  const enablePush = async () => {
+    try {
+      const messaging = await getFirebaseMessaging();
 
-        if (!messaging) {
-          console.log("❌ Push not supported");
-          return;
-        }
+      if (!messaging) {
+        alert("Push not supported");
+        return;
+      }
 
-        // 🔥 Request permission
-        const permission = await Notification.requestPermission();
+      // 🔥 MUST be user-triggered on iOS
+      const permission = await Notification.requestPermission();
 
-        if (permission !== "granted") {
-          console.log("❌ Permission denied");
-          return;
-        }
+      if (permission !== "granted") {
+        alert("Permission denied");
+        return;
+      }
 
-        // 🔥 Get token
-        const token = await getToken(messaging, {
-          vapidKey: "BNuJ8PIqjB4vxPIpRtz26judiC3T9Cy_AbAXaZNY8EyoHVvpGtiV9A-zgQ6nOPFHYBFKKvvmRbS0MOzVlgNn4yE",
+      const token = await getToken(messaging, {
+        vapidKey: "BNuJ8PIqjB4vxPIpRtz26judiC3T9Cy_AbAXaZNY8EyoHVvpGtiV9A-zgQ6nOPFHYBFKKvvmRbS0MOzVlgNn4yE",
+      });
+
+      alert("🔥 TOKEN:\n\n" + token);
+      console.log("🔥 PUSH TOKEN:", token);
+
+      // 🔥 Foreground notifications
+      onMessage(messaging, (payload) => {
+        const title = payload.notification?.title || "Notification";
+
+        navigator.serviceWorker.ready.then((registration) => {
+          registration.showNotification(title, {
+            body: payload.notification?.body,
+            icon: "/icon-192.png",
+          });
         });
-        alert("TOKEN: " + token);
-        console.log("🔥 PUSH TOKEN:", token);
+      });
 
-        // 🔥 OPTIONAL (NEXT STEP): send token to backend
-        // await fetch("/api/save-token", {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({ token }),
-        // });
-
-        // 🔥 HANDLE FOREGROUND NOTIFICATIONS (THIS WAS MISSING)
-        onMessage(messaging, (payload) => {
-  console.log("📩 Foreground message:", payload);
-
-  const title = payload.notification?.title || "Notification";
-  const options = {
-    body: payload.notification?.body,
-    icon: "/icon-192.png",
+    } catch (err) {
+      console.error("Push error:", err);
+      alert("Push error — check console");
+    }
   };
 
-  // 🔥 FORCE notification using service worker
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.ready.then((registration) => {
-      registration.showNotification(title, options);
-    });
-  }
-});
-      } catch (err) {
-        console.error("❌ Push error:", err);
-      }
-    }
-
-    init();
-  }, []);
-
-  return null;
+  return (
+    <button
+      onClick={enablePush}
+      style={{
+        padding: "12px 20px",
+        background: "#ff7a00",
+        borderRadius: "8px",
+        color: "#000",
+        fontWeight: 700,
+        border: "none",
+        cursor: "pointer",
+      }}
+    >
+      Enable Notifications 🔔
+    </button>
+  );
 }
