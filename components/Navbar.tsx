@@ -1,8 +1,12 @@
 "use client";
 
 import { useState } from "react";
+
 import { Menu, X } from "lucide-react";
+
 import { usePathname } from "next/navigation";
+
+import LoginButton from "@/components/LoginButton";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -18,25 +22,41 @@ export default function Navbar() {
           TRIGGA5TREY
         </a>
 
-        <nav className="desktop-nav">
-          <NavLink href="/" label="Home" active={pathname === "/"} />
-          <NavLink
-            href="/socials"
-            label="Socials"
-            active={pathname === "/socials"}
-          />
-          <NavLink
-            href="/shop"
-            label="Shop"
-            active={pathname === "/shop"}
-          />
-          <NavLink
-            href="/admin"
-            label="Admin"
-            active={pathname === "/admin"}
-          />
-        </nav>
+        {/* 🔥 DESKTOP NAV */}
+        <div style={desktopRight}>
+          <nav className="desktop-nav">
+            <NavLink
+              href="/"
+              label="Home"
+              active={pathname === "/"}
+            />
 
+            <NavLink
+              href="/socials"
+              label="Socials"
+              active={pathname === "/socials"}
+            />
+
+            <NavLink
+              href="/shop"
+              label="Shop"
+              active={pathname === "/shop"}
+            />
+
+            <NavLink
+              href="/admin"
+              label="Admin"
+              active={pathname === "/admin"}
+            />
+          </nav>
+
+          {/* 🔥 DISCORD LOGIN */}
+          <div className="desktop-login">
+            <LoginButton />
+          </div>
+        </div>
+
+        {/* 🔥 MOBILE MENU BUTTON */}
         <button
           onClick={() => setOpen(!open)}
           style={mobileButton}
@@ -46,6 +66,7 @@ export default function Navbar() {
         </button>
       </div>
 
+      {/* 🔥 MOBILE MENU */}
       {open && (
         <div style={mobileMenu}>
           <MobileLink
@@ -71,6 +92,11 @@ export default function Navbar() {
             label="Admin"
             onClick={handleNavClick}
           />
+
+          {/* 🔥 MOBILE LOGIN */}
+          <div style={{ marginTop: "10px" }}>
+            <LoginButton />
+          </div>
         </div>
       )}
 
@@ -82,12 +108,22 @@ export default function Navbar() {
             align-items: center;
           }
 
+          .desktop-login {
+            display: flex;
+            align-items: center;
+          }
+
           .mobile-menu-btn {
             display: none;
           }
 
           @media (max-width: 768px) {
+
             .desktop-nav {
+              display: none;
+            }
+
+            .desktop-login {
               display: none;
             }
 
@@ -100,6 +136,8 @@ export default function Navbar() {
     </header>
   );
 }
+
+/* 🔥 NAV LINK */
 
 function NavLink({
   href,
@@ -123,13 +161,17 @@ function NavLink({
         e.currentTarget.style.color = "#fff";
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.color = active ? "#fff" : "#8d8d8d";
+        e.currentTarget.style.color = active
+          ? "#fff"
+          : "#8d8d8d";
       }}
     >
       {label}
     </a>
   );
 }
+
+/* 🔥 MOBILE LINK */
 
 function MobileLink({
   href,
@@ -156,13 +198,16 @@ function MobileLink({
   );
 }
 
+/* 🔥 STYLES */
+
 const header = {
   position: "sticky" as const,
   top: 0,
   zIndex: 100,
   background: "rgba(0,0,0,0.65)",
   backdropFilter: "blur(18px)",
-  borderBottom: "1px solid rgba(255,255,255,0.06)",
+  borderBottom:
+    "1px solid rgba(255,255,255,0.06)",
 };
 
 const navWrapper = {
@@ -172,6 +217,12 @@ const navWrapper = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
+};
+
+const desktopRight = {
+  display: "flex",
+  alignItems: "center",
+  gap: "22px",
 };
 
 const logo = {
@@ -191,7 +242,8 @@ const mobileButton = {
 
 const mobileMenu = {
   background: "rgba(0,0,0,0.96)",
-  borderTop: "1px solid rgba(255,255,255,0.08)",
+  borderTop:
+    "1px solid rgba(255,255,255,0.08)",
   padding: "25px",
   display: "flex",
   flexDirection: "column" as const,

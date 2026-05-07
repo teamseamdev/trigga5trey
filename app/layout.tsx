@@ -1,9 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
 import "./globals.css";
+
 import Navbar from "@/components/Navbar";
 import InstallButton from "@/components/InstallButton";
-// ❌ removed PushNotifications import
+
+import SessionWrapper from "@/components/SessionWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,6 +22,7 @@ export const metadata: Metadata = {
   title: "TRIGGA5TREY",
   description: "Official site",
   manifest: "/manifest.json",
+
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
@@ -37,12 +41,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-capable"
+          content="yes"
+        />
+
         <meta
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
         />
-        <meta name="apple-mobile-web-app-title" content="TRIGGA5TREY" />
+
+        <meta
+          name="apple-mobile-web-app-title"
+          content="TRIGGA5TREY"
+        />
 
         <link
           rel="apple-touch-startup-image"
@@ -74,16 +86,20 @@ export default function RootLayout({
           backgroundAttachment: "fixed",
         }}
       >
-        <div
-          style={{
-            minHeight: "100vh",
-            background: "rgba(0,0,0,0.75)",
-          }}
-        >
-          <Navbar />
-          {children}
-          <InstallButton />
-        </div>
+        <SessionWrapper>
+          <div
+            style={{
+              minHeight: "100vh",
+              background: "rgba(0,0,0,0.75)",
+            }}
+          >
+            <Navbar />
+
+            {children}
+
+            <InstallButton />
+          </div>
+        </SessionWrapper>
       </body>
     </html>
   );
