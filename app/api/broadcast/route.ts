@@ -94,7 +94,8 @@ await db.collection("notifications").add({
 /* 🔥 Activity feed */
 await db.collection("activity").add({
   type: "broadcast",
-  message: `Notification sent: ${title}`,
+  title,
+  body,
   createdAt: admin.firestore.FieldValue.serverTimestamp(),
 });
 

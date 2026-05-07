@@ -9,6 +9,7 @@ import {
   orderBy,
   query,
 } from "firebase/firestore";
+
 import { db } from "@/lib/firebase";
 
 export default function AdminPage() {
@@ -24,7 +25,8 @@ export default function AdminPage() {
 
   /* 🔥 Analytics */
   const [totalUsers, setTotalUsers] = useState(0);
-  const [totalNotifications, setTotalNotifications] = useState(0);
+  const [totalNotifications, setTotalNotifications] =
+    useState(0);
   const [liveAlerts, setLiveAlerts] = useState(0);
 
   const [activity, setActivity] = useState<any[]>([]);
@@ -185,7 +187,9 @@ export default function AdminPage() {
           type="password"
           placeholder="Enter password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) =>
+            setPassword(e.target.value)
+          }
           style={input}
         />
 
@@ -204,7 +208,10 @@ export default function AdminPage() {
           📊 Analytics Dashboard
         </h1>
 
-        <button onClick={logout} style={logoutButton}>
+        <button
+          onClick={logout}
+          style={logoutButton}
+        >
           Logout
         </button>
       </div>
@@ -251,7 +258,10 @@ export default function AdminPage() {
           }}
         />
 
-        <button onClick={sendNotification} style={button}>
+        <button
+          onClick={sendNotification}
+          style={button}
+        >
           {loading
             ? "Sending..."
             : "Send Notification 🚀"}
@@ -266,9 +276,20 @@ export default function AdminPage() {
 
         <div style={activityList}>
           {activity.map((item) => (
-            <div key={item.id} style={activityItem}>
-              <div style={activityMessage}>
-                {item.message || item.title}
+            <div
+              key={item.id}
+              style={activityItem}
+            >
+              <div style={activityContent}>
+                <div style={activityTitle}>
+                  {item.title || item.message}
+                </div>
+
+                {item.body && (
+                  <div style={activityBody}>
+                    {item.body}
+                  </div>
+                )}
               </div>
 
               <div style={activityType}>
@@ -368,7 +389,8 @@ const panelTitle = {
 const input = {
   padding: "14px",
   borderRadius: "14px",
-  border: "1px solid rgba(255,255,255,0.1)",
+  border:
+    "1px solid rgba(255,255,255,0.1)",
   background: "#111",
   color: "#fff",
   fontSize: "16px",
@@ -404,19 +426,34 @@ const activityList = {
 const activityItem = {
   display: "flex",
   justifyContent: "space-between",
-  alignItems: "center",
-  padding: "14px",
-  borderRadius: "14px",
+  alignItems: "flex-start",
+  gap: "16px",
+  padding: "16px",
+  borderRadius: "16px",
   background: "rgba(255,255,255,0.03)",
-  border: "1px solid rgba(255,255,255,0.06)",
+  border:
+    "1px solid rgba(255,255,255,0.06)",
 };
 
-const activityMessage = {
-  fontWeight: 600,
+const activityContent = {
+  display: "flex",
+  flexDirection: "column" as const,
+  gap: "6px",
+  flex: 1,
+};
+
+const activityTitle = {
+  fontWeight: 700,
+};
+
+const activityBody = {
+  opacity: 0.7,
+  fontSize: "0.92rem",
+  lineHeight: 1.4,
 };
 
 const activityType = {
-  fontSize: "0.85rem",
+  fontSize: "0.78rem",
   opacity: 0.6,
   textTransform: "uppercase" as const,
 };
