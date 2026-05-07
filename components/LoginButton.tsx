@@ -1,9 +1,14 @@
 "use client";
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import {
+  signIn,
+  signOut,
+  useSession,
+} from "next-auth/react";
 
 export default function LoginButton() {
-  const { data: session, status } = useSession();
+  const { data: session, status } =
+    useSession();
 
   /* 🔥 Loading */
   if (status === "loading") {
@@ -16,9 +21,11 @@ export default function LoginButton() {
 
   /* 🔥 Logged in */
   if (session?.user) {
+    const user = session.user as any;
+
     const avatar =
-      session.user.avatar &&
-      `https://cdn.discordapp.com/avatars/${session.user.id}/${session.user.avatar}.png`;
+      user.avatar &&
+      `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
 
     return (
       <div style={userWrap}>
@@ -32,7 +39,7 @@ export default function LoginButton() {
 
         <div style={userInfo}>
           <div style={username}>
-            {session.user.username}
+            {user.username}
           </div>
 
           <button
@@ -90,7 +97,8 @@ const avatarStyle = {
   width: "42px",
   height: "42px",
   borderRadius: "999px",
-  border: "2px solid rgba(255,255,255,0.15)",
+  border:
+    "2px solid rgba(255,255,255,0.15)",
 };
 
 const userInfo = {
