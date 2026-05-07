@@ -7,6 +7,10 @@
     {
       "path": "/api/discord-sync",
       "schedule": "*/1 * * * *"
+    },
+    {
+      "path": "/api/scanner-sync",
+      "schedule": "*/1 * * * *"
     }
   ]
 }

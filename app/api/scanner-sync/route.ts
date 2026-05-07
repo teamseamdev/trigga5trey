@@ -27,10 +27,10 @@ const BOT_TOKEN =
 
 export async function GET() {
   try {
-    /* 🔥 FETCH DISCORD MESSAGES */
+    /* 🔥 FETCH RECENT DISPATCHES */
 
     const res = await fetch(
-      `https://discord.com/api/v10/channels/${SCANNER_CHANNEL_ID}/messages?limit=5`,
+      `https://discord.com/api/v10/channels/${SCANNER_CHANNEL_ID}/messages?limit=10`,
       {
         headers: {
           Authorization: `Bot ${BOT_TOKEN}`,
@@ -58,21 +58,7 @@ export async function GET() {
     const messages =
       await res.json();
 
-    /* 🔥 CLEAR OLD FEED */
-
-    const oldFeed =
-      await db
-        .collection("scannerFeed")
-        .get();
-
-    const batch =
-      db.batch();
-
-    oldFeed.docs.forEach((doc) => {
-      batch.delete(doc.ref);
-    });
-
-    /* 🔥 PARSE DISPATCHES */
+    /* 🔥 PARSE + SAVE */
 
     for (const msg of messages) {
       const embed =
@@ -80,81 +66,126 @@ export async function GET() {
 
       if (!embed) continue;
 
+      /* 🔥 PREVENT DUPES */
+
+      const existing =
+        await db
+          .collection(
+            "scannerFeed"
+          )
+          .doc(msg.id)
+          .get();
+
+      if (existing.exists) {
+        continue;
+      }
+
       const raw =
         embed.description || "";
 
-      /* 🔥 EXTRACT DATA */
-
-      const mdtsMatch =
-        raw.match(
-          /"mdts":\s*\[\s*"([^"]+)"/
-        );
+      /* 🔥 DESCRIPTION */
 
       const descMatch =
         raw.match(
           /"description":\s*"([^"]+)"/
         );
 
+      /* 🔥 PRIORITY */
+
       const priorityMatch =
         raw.match(
           /"priority":\s*"([^"]+)"/
         );
 
-      const locationMatch =
+      /* 🔥 CODE */
+
+      const codeMatch =
         raw.match(
-          /"label":\s*"([^"]+)"/g
+          /"code":\s*"([^"]+)"/
         );
 
-      const lastLocation =
-        locationMatch?.[
-          locationMatch.length - 1
-        ];
+      const code =
+        codeMatch?.[1] || "";
 
-      const cleanLocation =
-        lastLocation
-          ?.replace(
-            /"label":\s*"/,
-            ""
-          )
-          ?.replace(`"`, "");
+      /* 🔥 TITLE CLEANUP */
 
-      const dispatch = {
-        title:
-          embed.title ||
-          "Unknown Dispatch",
+      let cleanTitle =
+        embed.title?.replace(
+          "New Dispatch: ",
+          ""
+        ) || "Dispatch";
 
-        description:
-          descMatch?.[1] ||
-          "No description",
+      if (code === "10-911") {
+        cleanTitle =
+          "911 Call";
+      }
 
-        mdts: mdtsMatch
-          ? [mdtsMatch[1]]
-          : [],
+      if (
+        cleanTitle.includes(" - ")
+      ) {
+        cleanTitle =
+          cleanTitle.split(
+            " - "
+          )[0];
+      }
 
-        priority:
-          priorityMatch?.[1] ||
-          "unknown",
+      /* 🔥 TIME */
 
-        location:
-          cleanLocation ||
-          "Unknown Location",
+      const createdAt =
+        new Date(
+          msg.timestamp
+        );
 
-       
-createdAt: new Date(
-  msg.timestamp
-),
+      /* 🔥 SAVE */
 
+      await db
+        .collection(
+          "scannerFeed"
+        )
+        .doc(msg.id)
+        .set({
+          title: cleanTitle,
 
-      };
+          description:
+            descMatch?.[1] ||
+            "No description",
 
-      const ref = db
-        .collection("scannerFeed")
-        .doc(msg.id);
+          priority:
+            priorityMatch?.[1] ||
+            "unknown",
 
-      batch.set(ref, dispatch);
+          createdAt,
+        });
     }
 
-    await batch.commit();
+    /* 🔥 KEEP ONLY LATEST 6 */
+
+    const snapshot =
+      await db
+        .collection(
+          "scannerFeed"
+        )
+        .orderBy(
+          "createdAt",
+          "desc"
+        )
+        .get();
+
+    if (snapshot.size > 6) {
+      const oldDocs =
+        snapshot.docs.slice(6);
+
+      const deleteBatch =
+        db.batch();
+
+      oldDocs.forEach((doc) => {
+        deleteBatch.delete(
+          doc.ref
+        );
+      });
+
+      await deleteBatch.commit();
+    }
 
     return NextResponse.json({
       success: true,
