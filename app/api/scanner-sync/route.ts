@@ -136,26 +136,61 @@ export async function GET() {
           msg.timestamp
         );
 
+    
+          /* 🔥 DUPLICATE CHECK */
+
+          const duplicateCheck =
+            await db
+              .collection("scannerFeed")
+              .where(
+                "title",
+                "==",
+                cleanTitle
+              )
+              .where(
+                "description",
+                "==",
+                descMatch?.[1] ||
+                  "No description"
+              )
+              .where(
+                "code",
+                "==",
+                code
+              )
+              .get();
+
+          if (!duplicateCheck.empty) {
+            continue;
+          }
+
+
+
       /* 🔥 SAVE */
 
-      await db
-        .collection(
-          "scannerFeed"
-        )
-        .doc(msg.id)
-        .set({
-          title: cleanTitle,
+     
+        await db
+          .collection(
+            "scannerFeed"
+          )
+          .doc(msg.id)
+          .set({
+            title: cleanTitle,
 
-          description:
-            descMatch?.[1] ||
-            "No description",
+            description:
+              descMatch?.[1] ||
+              "No description",
 
-          priority:
-            priorityMatch?.[1] ||
-            "unknown",
+            priority:
+              priorityMatch?.[1] ||
+              "unknown",
 
-          createdAt,
-        });
+            code,
+
+            createdAt,
+          });
+
+
     }
 
     /* 🔥 KEEP ONLY LATEST 6 */
