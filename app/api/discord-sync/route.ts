@@ -4,36 +4,94 @@ import admin from "firebase-admin";
 
 /* 🔥 FIREBASE INIT */
 if (!admin.apps.length) {
+  const serviceAccount = JSON.parse(
+    process.env.FIREBASE_SERVICE_ACCOUNT!
+  );
+
   admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId:
-        process.env.FIREBASE_PROJECT_ID,
-
-      clientEmail:
-        process.env.FIREBASE_CLIENT_EMAIL,
-
-      privateKey:
-        process.env.FIREBASE_PRIVATE_KEY?.replace(
-          /\\n/g,
-          "\n"
-        ),
-    }),
+    credential: admin.credential.cert(
+      serviceAccount
+    ),
   });
 }
 
 const db = admin.firestore();
 
-/* 🔥 DISCORD ROLE IDS */
-const ROLE_IDS = {
-  whitelist: "1474944355436331059",
+/* 🔥 ROLE CONFIG */
+/* 
+   EASY TO EDIT:
+   key = Firestore/UI key
+   label = display name
+   id = Discord role ID
+*/
 
-  business: "1478547781970038835",
+const ROLE_CONFIG = {
+  citizens: {
+    label: "Citizens",
 
-  bayside: "1499498301668724878",
+    roles: [
+      "1474944355436331059",
+    ],
+  },
 
-  gmsl: "1499495752710361088",
+  businesses: {
+    label: "Business Owners",
 
-  publicsafety: "1478443485148217424",
+    roles: [
+      "1478547781970038835",
+    ],
+  },
+
+  gangMembers: {
+    label: "Gang Members",
+
+    roles: [
+      "1499498301668724878", // Bayside
+      "1499495752710361088", // GMSL
+      "1501803880827326524", // M Hood
+    ],
+  },
+
+  leo: {
+    label: "LEO",
+
+    roles: [
+      "1478443485148217424",
+    ],
+  },
+
+  safr: {
+    label: "Fire/EMS",
+
+    roles: [
+      "1501808768630128760",
+    ],
+  },
+
+  doj: {
+    label: "Lawyers",
+
+    roles: [
+      "1501809512481296404",
+    ],
+  },
+
+  mech: {
+    label: "Mechanics",
+
+    roles: [
+      "1501809512355598468",
+    ],
+  },
+
+  staff: {
+    label: "Staff",
+
+    roles: [
+      "1474096471862153288",
+      "1474944226881044680",
+    ],
+  },
 };
 
 export async function GET() {
@@ -54,7 +112,7 @@ export async function GET() {
       );
     }
 
-    /* 🔥 FETCH MEMBERS */
+    /* 🔥 FETCH DISCORD MEMBERS */
     const res = await fetch(
       `https://discord.com/api/v10/guilds/${guildId}/members?limit=1000`,
       {
@@ -67,7 +125,8 @@ export async function GET() {
     );
 
     if (!res.ok) {
-      const errorText = await res.text();
+      const errorText =
+        await res.text();
 
       console.error(
         "Discord API Error:",
@@ -85,66 +144,36 @@ export async function GET() {
 
     const members = await res.json();
 
-    /* 🔥 COMMUNITY COUNTS */
-    const counts = {
-      citizens: 0,
+    /* 🔥 DYNAMIC COUNTS */
+    const counts: Record<
+      string,
+      number
+    > = {};
 
-      businesses: 0,
+    Object.keys(ROLE_CONFIG).forEach(
+      (key) => {
+        counts[key] = 0;
+      }
+    );
 
-      bayside: 0,
-
-      gmsl: 0,
-
-      publicSafety: 0,
-    };
-
+    /* 🔥 LOOP MEMBERS */
     members.forEach((member: any) => {
-      const roles = member.roles || [];
+      const roles =
+        member.roles || [];
 
-      /* 🔥 Whitelist */
-      if (
-        roles.includes(
-          ROLE_IDS.whitelist
-        )
-      ) {
-        counts.citizens++;
-      }
+      Object.entries(
+  ROLE_CONFIG
+).forEach(([key, config]) => {
+  const hasRole =
+    config.roles.some(
+      (roleId) =>
+        roles.includes(roleId)
+    );
 
-      /* 🔥 Business Owners */
-      if (
-        roles.includes(
-          ROLE_IDS.business
-        )
-      ) {
-        counts.businesses++;
-      }
-
-      /* 🔥 Bayside */
-      if (
-        roles.includes(
-          ROLE_IDS.bayside
-        )
-      ) {
-        counts.bayside++;
-      }
-
-      /* 🔥 GMSL */
-      if (
-        roles.includes(
-          ROLE_IDS.gmsl
-        )
-      ) {
-        counts.gmsl++;
-      }
-
-      /* 🔥 Public Safety */
-      if (
-        roles.includes(
-          ROLE_IDS.publicsafety
-        )
-      ) {
-        counts.publicSafety++;
-      }
+  if (hasRole) {
+    counts[key]++;
+  }
+});
     });
 
     /* 🔥 SAVE TO FIRESTORE */

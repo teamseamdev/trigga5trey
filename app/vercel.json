@@ -2,7 +2,11 @@
   "crons": [
     {
       "path": "/api/live-check",
-      "schedule": "* * * * *"
+      "schedule": "*/1 * * * *"
+    },
+    {
+      "path": "/api/discord-sync",
+      "schedule": "*/1 * * * *"
     }
   ]
 }

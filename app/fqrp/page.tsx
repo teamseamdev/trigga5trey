@@ -1,10 +1,88 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import {
+  doc,
+  onSnapshot,
+} from "firebase/firestore";
+
+import { db } from "@/lib/firebase";
+
+/* 🔥 ROLE LABELS */
+const ROLE_LABELS: Record<
+  string,
+  string
+> = {
+ citizens: "Citizens",
+
+  businesses: "Business Owners",
+
+  gangMembers: "Gang Members",
+
+  leo: "LEO",
+
+  safr: "Fire/EMS",
+
+  doj: "Lawyers",
+
+  mech: "Mechanics",
+
+  staff: "Staff",
+  
+};
+
+const ROLE_ORDER = [
+   "citizens",
+  "businesses",
+  "gangMembers",
+  "leo",
+  "safr",
+  "doj",
+  "mech",
+  "staff",
+  
+];
+
 export default function FQRPPage() {
+  const [stats, setStats] =
+    useState<Record<string, number>>(
+      {}
+    );
+
+  /* 🔥 LIVE FIRESTORE STATS */
+  useEffect(() => {
+    const ref = doc(
+      db,
+      "communityStats",
+      "live"
+    );
+
+    const unsub = onSnapshot(ref, (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+
+        delete data.updatedAt;
+
+        setStats(
+          data as Record<
+            string,
+            number
+          >
+        );
+      }
+    });
+
+    return () => unsub();
+  }, []);
+
   return (
     <main
       style={{
         color: "#fff",
         minHeight: "100vh",
-        fontFamily: "Inter, Arial, sans-serif",
+        fontFamily:
+          "Inter, Arial, sans-serif",
       }}
     >
       {/* 🔥 HERO */}
@@ -21,8 +99,8 @@ export default function FQRPPage() {
           </h1>
 
           <p style={subtext}>
-            The official roleplay universe of
-            THE FIVE.
+            The official roleplay universe
+            of THE FIVE.
           </p>
 
           <div style={heroButtons}>
@@ -45,29 +123,19 @@ export default function FQRPPage() {
         </div>
       </section>
 
-      {/* 🔥 LIVE STATS */}
-      <section style={statsSection}>
-        <StatCard
-          value="247"
-          label="Citizens"
-        />
-
-        <StatCard
-          value="18"
-          label="Businesses"
-        />
-
-        <StatCard
-          value="6"
-          label="Active Gangs"
-        />
-
-        <StatCard
-          value="24/7"
-          label="City Status"
-        />
-      </section>
-
+     {/* 🔥 LIVE STATS */}
+<section style={statsSection}>
+  {ROLE_ORDER.map((key) => (
+    <StatCard
+      key={key}
+      value={String(stats[key] || 0)}
+      label={
+        ROLE_LABELS[key] || key
+      }
+    />
+  ))}
+  
+</section>
       {/* 🔥 FEATURE GRID */}
       <section
         id="features"
@@ -98,7 +166,9 @@ export default function FQRPPage() {
       <section style={livePanel}>
         <div style={liveGlow} />
 
-        <div style={{ position: "relative" }}>
+        <div
+          style={{ position: "relative" }}
+        >
           <div style={panelTag}>
             LIVE CITY STATUS
           </div>
@@ -109,9 +179,10 @@ export default function FQRPPage() {
 
           <p style={panelText}>
             Live player counts, faction
-            activity, dispatch feeds, economy
-            tracking, territory control, and
-            citywide events will appear here.
+            activity, dispatch feeds,
+            economy tracking, territory
+            control, and citywide events
+            will appear here.
           </p>
         </div>
       </section>
@@ -151,9 +222,13 @@ function StatCard({
 }) {
   return (
     <div style={statCard}>
-      <div style={statValue}>{value}</div>
+      <div style={statValue}>
+        {value}
+      </div>
 
-      <div style={statLabel}>{label}</div>
+      <div style={statLabel}>
+        {label}
+      </div>
     </div>
   );
 }
@@ -207,8 +282,10 @@ const tag = {
   display: "inline-block",
   padding: "10px 18px",
   borderRadius: "999px",
-  background: "rgba(255,122,0,0.12)",
-  border: "1px solid rgba(255,122,0,0.3)",
+  background:
+    "rgba(255,122,0,0.12)",
+  border:
+    "1px solid rgba(255,122,0,0.3)",
   color: "#ff7a00",
   fontWeight: 700,
   letterSpacing: "2px",
@@ -217,7 +294,8 @@ const tag = {
 };
 
 const headline = {
-  fontSize: "clamp(3rem, 8vw, 6rem)",
+  fontSize:
+    "clamp(3rem, 8vw, 6rem)",
   fontWeight: 900,
   lineHeight: 1,
   marginBottom: "22px",
@@ -274,7 +352,8 @@ const statsSection = {
 const statCard = {
   padding: "28px",
   borderRadius: "24px",
-  background: "rgba(255,255,255,0.04)",
+  background:
+    "rgba(255,255,255,0.04)",
   border:
     "1px solid rgba(255,255,255,0.08)",
   backdropFilter: "blur(12px)",
@@ -304,7 +383,8 @@ const featuresSection = {
 const featureCard = {
   padding: "28px",
   borderRadius: "24px",
-  background: "rgba(255,255,255,0.03)",
+  background:
+    "rgba(255,255,255,0.03)",
   border:
     "1px solid rgba(255,255,255,0.08)",
   backdropFilter: "blur(14px)",
@@ -327,7 +407,8 @@ const livePanel = {
   borderRadius: "30px",
   overflow: "hidden",
   position: "relative" as const,
-  background: "rgba(255,255,255,0.03)",
+  background:
+    "rgba(255,255,255,0.03)",
   border:
     "1px solid rgba(255,255,255,0.08)",
 };
@@ -350,7 +431,8 @@ const panelTag = {
 };
 
 const panelHeadline = {
-  fontSize: "clamp(2rem, 5vw, 3.5rem)",
+  fontSize:
+    "clamp(2rem, 5vw, 3.5rem)",
   marginBottom: "18px",
 };
 
@@ -366,7 +448,8 @@ const ctaSection = {
 };
 
 const ctaHeadline = {
-  fontSize: "clamp(2.5rem, 6vw, 4rem)",
+  fontSize:
+    "clamp(2.5rem, 6vw, 4rem)",
   marginBottom: "14px",
 };
 
