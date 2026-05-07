@@ -80,15 +80,23 @@ export async function POST(req: Request) {
       }
     });
 
-    /* 🔥 Analytics log */
-    await db.collection("notifications").add({
-      title,
-      body,
-      url: url || "/",
-      sent: response.successCount,
-      failed: response.failureCount,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+   /* 🔥 Analytics log */
+await db.collection("notifications").add({
+  type: "broadcast",
+  title,
+  body,
+  url: url || "/",
+  sent: response.successCount,
+  failed: response.failureCount,
+  createdAt: admin.firestore.FieldValue.serverTimestamp(),
+});
+
+/* 🔥 Activity feed */
+await db.collection("activity").add({
+  type: "broadcast",
+  message: `Notification sent: ${title}`,
+  createdAt: admin.firestore.FieldValue.serverTimestamp(),
+});
 
     console.log("📢 Sent to:", response.successCount);
 
