@@ -44,6 +44,12 @@ export default function Navbar() {
             />
 
             <NavLink
+              href="/fqrp"
+              label="FQRP"
+              active={pathname === "/fqrp"}
+            />
+
+            <NavLink
               href="/admin"
               label="Admin"
               active={pathname === "/admin"}
@@ -84,6 +90,12 @@ export default function Navbar() {
           <MobileLink
             href="/shop"
             label="Shop"
+            onClick={handleNavClick}
+          />
+
+          <MobileLink
+            href="/fqrp"
+            label="FQRP"
             onClick={handleNavClick}
           />
 
