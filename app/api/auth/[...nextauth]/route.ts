@@ -18,20 +18,23 @@ const handler = NextAuth({
   callbacks: {
     async jwt({ token, account, profile }) {
       if (account && profile) {
-        token.discordId = profile.id;
-        token.username = profile.username;
-        token.avatar = profile.avatar;
+        token.discordId = (profile as any).id;
+        token.username = (profile as any).username;
+        token.avatar = (profile as any).avatar;
       }
 
       return token;
     },
 
     async session({ session, token }) {
-      session.user.id = token.discordId as string;
+      (session.user as any).id =
+        token.discordId as string;
 
-      session.user.username = token.username as string;
+      (session.user as any).username =
+        token.username as string;
 
-      session.user.avatar = token.avatar as string;
+      (session.user as any).avatar =
+        token.avatar as string;
 
       return session;
     },
