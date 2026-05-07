@@ -8,13 +8,19 @@ import { CSSProperties } from "react";
 const FORCE_LIVE = false;
 
 export default async function Home() {
-  const isLive = FORCE_LIVE || (await isTwitchLive("trigga5trey"));
+  const isLive =
+    FORCE_LIVE ||
+    (await isTwitchLive("trigga5trey"));
 
   return (
     <main style={main}>
       <div style={backgroundAccent} />
 
-      {isLive ? <LiveView /> : <OfflineHero />}
+      {isLive ? (
+        <LiveView />
+      ) : (
+        <OfflineHero />
+      )}
     </main>
   );
 }
@@ -33,28 +39,45 @@ function LiveView() {
         LIVE NOW
       </div>
 
-      <div style={liveContent}>
-        <h1 style={liveHeadline}>TRIGGA5TREY IS LIVE</h1>
+      <div
+        style={liveContent}
+        className="live-content"
+      >
+        <h1 style={liveHeadline}>
+          TRIGGA5TREY IS LIVE
+        </h1>
 
         <p style={liveSubtext}>
-          Tap in with the stream and join the movement.
+          Tap in with the stream and join
+          the movement.
         </p>
+
+        <div style={buttons}>
+          <a
+            href="/shop"
+            style={primaryBtn}
+          >
+            Shop Merch
+          </a>
+
+          <a
+            href="https://discord.gg/MVzzrFtUcR"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={secondaryBtn}
+          >
+            Join Discord
+          </a>
+        </div>
       </div>
 
-      <div style={buttons}>
-        <a href="/shop" style={primaryBtn}>
-          Shop Merch
-        </a>
-
-        <a
-          href="https://discord.gg/MVzzrFtUcR"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={secondaryBtn}
-        >
-          Join Discord
-        </a>
-      </div>
+      <style>{`
+        @media (max-width: 768px) {
+          .live-content {
+            padding-bottom: 110px !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }
@@ -65,11 +88,15 @@ function OfflineHero() {
   return (
     <section style={centered}>
       <div style={heroContent}>
-        <div style={miniBadge}>TRIGGA5TREY</div>
+        <div style={miniBadge}>
+          TRIGGA5TREY
+        </div>
 
         <h1 style={headline}>
           WELCOME TO{" "}
-          <span style={gradientText}>THE FIVE</span>
+          <span style={gradientText}>
+            THE FIVE
+          </span>
         </h1>
 
         <p style={subText}>
@@ -77,7 +104,10 @@ function OfflineHero() {
         </p>
 
         <div style={heroButtons}>
-          <a href="/shop" style={primaryBtn}>
+          <a
+            href="/shop"
+            style={primaryBtn}
+          >
             Shop Collection
           </a>
 
@@ -91,7 +121,11 @@ function OfflineHero() {
           </a>
         </div>
 
-        <div style={{ marginTop: "25px" }}>
+        <div
+          style={{
+            marginTop: "25px",
+          }}
+        >
           <PushNotifications />
         </div>
       </div>
@@ -110,10 +144,11 @@ const main: CSSProperties = {
     "linear-gradient(to bottom, #0a0a0a 0%, #000 100%)",
 };
 
-const backgroundAccent: CSSProperties = {
-  position: "absolute",
-  inset: 0,
-  backgroundImage: `
+const backgroundAccent: CSSProperties =
+  {
+    position: "absolute",
+    inset: 0,
+    backgroundImage: `
     linear-gradient(
       to bottom,
       rgba(0,0,0,0.72),
@@ -121,11 +156,11 @@ const backgroundAccent: CSSProperties = {
     ),
     url('/hero.jpg')
   `,
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
-  zIndex: 0,
-};
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    zIndex: 0,
+  };
 
 const liveSection: CSSProperties = {
   height: "100vh",
@@ -137,6 +172,7 @@ const overlay: CSSProperties = {
   inset: 0,
   background:
     "linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.25))",
+  pointerEvents: "none",
 };
 
 const liveBadge: CSSProperties = {
@@ -146,8 +182,10 @@ const liveBadge: CSSProperties = {
   display: "flex",
   alignItems: "center",
   gap: "8px",
-  background: "rgba(255,45,45,0.15)",
-  border: "1px solid rgba(255,45,45,0.35)",
+  background:
+    "rgba(255,45,45,0.15)",
+  border:
+    "1px solid rgba(255,45,45,0.35)",
   padding: "10px 14px",
   borderRadius: "999px",
   fontWeight: 700,
@@ -165,19 +203,26 @@ const pulseDot: CSSProperties = {
 
 const liveContent: CSSProperties = {
   position: "absolute",
-  bottom: 150,
-  left: "50%",
-  transform: "translateX(-50%)",
-  textAlign: "center",
-  width: "100%",
-  padding: "0 20px",
+  inset: 0,
+
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "flex-end",
+
+  paddingBottom: "40px",
+
   zIndex: 10,
+
+  pointerEvents: "none",
 };
 
 const liveHeadline: CSSProperties = {
-  fontSize: "clamp(2.2rem, 7vw, 5rem)",
+  fontSize:
+    "clamp(2.2rem, 7vw, 5rem)",
   fontWeight: 900,
   marginBottom: "12px",
+  textAlign: "center",
 };
 
 const liveSubtext: CSSProperties = {
@@ -185,6 +230,7 @@ const liveSubtext: CSSProperties = {
   fontSize: "1.1rem",
   maxWidth: "600px",
   margin: "0 auto",
+  textAlign: "center",
 };
 
 const centered: CSSProperties = {
@@ -210,8 +256,10 @@ const miniBadge: CSSProperties = {
   marginBottom: "18px",
   padding: "8px 14px",
   borderRadius: "999px",
-  background: "rgba(255,122,0,0.08)",
-  border: "1px solid rgba(255,122,0,0.18)",
+  background:
+    "rgba(255,122,0,0.08)",
+  border:
+    "1px solid rgba(255,122,0,0.18)",
   color: "#ff7a00",
   fontSize: "0.85rem",
   letterSpacing: "2px",
@@ -219,7 +267,8 @@ const miniBadge: CSSProperties = {
 };
 
 const headline: CSSProperties = {
-  fontSize: "clamp(3rem, 8vw, 6rem)",
+  fontSize:
+    "clamp(3rem, 8vw, 6rem)",
   lineHeight: 0.95,
   marginBottom: "20px",
   fontWeight: 900,
@@ -229,7 +278,8 @@ const gradientText: CSSProperties = {
   background:
     "linear-gradient(90deg, #ff7a00 0%, #ffb36b 100%)",
   WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
+  WebkitTextFillColor:
+    "transparent",
 };
 
 const subText: CSSProperties = {
@@ -246,15 +296,16 @@ const heroButtons: CSSProperties = {
 };
 
 const buttons: CSSProperties = {
-  position: "absolute",
-  bottom: 45,
-  left: "50%",
-  transform: "translateX(-50%)",
   display: "flex",
-  gap: 15,
-  flexWrap: "wrap",
-  justifyContent: "center",
-  zIndex: 10,
+  flexDirection: "column",
+  gap: "16px",
+
+  width: "100%",
+  maxWidth: "320px",
+
+  marginTop: "24px",
+
+  pointerEvents: "auto",
 };
 
 const primaryBtn: CSSProperties = {
@@ -265,15 +316,20 @@ const primaryBtn: CSSProperties = {
   borderRadius: "14px",
   textDecoration: "none",
   fontWeight: 800,
-  boxShadow: "0 8px 24px rgba(255,122,0,0.28)",
+  boxShadow:
+    "0 8px 24px rgba(255,122,0,0.28)",
+  textAlign: "center",
 };
 
 const secondaryBtn: CSSProperties = {
   padding: "14px 28px",
-  border: "1px solid rgba(255,255,255,0.12)",
-  background: "rgba(255,255,255,0.03)",
+  border:
+    "1px solid rgba(255,255,255,0.12)",
+  background:
+    "rgba(255,255,255,0.03)",
   borderRadius: "14px",
   color: "#fff",
   textDecoration: "none",
   fontWeight: 700,
+  textAlign: "center",
 };
