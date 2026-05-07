@@ -145,6 +145,25 @@ export default function FQRPPage() {
           </div>
         </section>
 
+        {/* 🔥 STATS HEADER */}
+
+        <div style={statsHeader}>
+          <div style={statsTag}>
+            LIVE CITY DATA
+          </div>
+
+          <h2 style={statsTitle}>
+            City Stats
+          </h2>
+
+          <p style={statsSubtitle}>
+            Realtime community
+            and faction activity
+            across Fifth Quarter
+            RP.
+          </p>
+        </div>
+
         {/* 🔥 LIVE STATS */}
 
         <section
@@ -464,6 +483,48 @@ const secondaryBtn = {
 
   backdropFilter:
     "blur(10px)",
+};
+
+const statsHeader = {
+  textAlign: "center" as const,
+
+  padding:
+    "20px 20px 10px",
+
+  maxWidth: "800px",
+
+  margin: "0 auto",
+};
+
+const statsTag = {
+  color: "#ff7a00",
+
+  fontWeight: 800,
+
+  letterSpacing: "2px",
+
+  marginBottom: "12px",
+
+  fontSize: "0.8rem",
+};
+
+const statsTitle = {
+  fontSize:
+    "clamp(2rem, 5vw, 3.5rem)",
+
+  marginBottom: "12px",
+
+  fontWeight: 900,
+};
+
+const statsSubtitle = {
+  opacity: 0.7,
+
+  lineHeight: 1.6,
+
+  maxWidth: "650px",
+
+  margin: "0 auto",
 };
 
 const statsSection = {
