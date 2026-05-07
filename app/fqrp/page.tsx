@@ -499,12 +499,18 @@ const mobileStatsStyles = `
   }
 
   .scanner-scroll > div {
-    min-width: 88%;
+  width: 85vw;
 
-    scroll-snap-align: center;
+  min-width: 85vw;
 
-    flex-shrink: 0;
-  }
+  max-width: 85vw;
+
+  scroll-snap-align: center;
+
+  flex-shrink: 0;
+
+  box-sizing: border-box;
+}
 
 
 }
@@ -705,12 +711,21 @@ const scannerGrid = {
 const scannerCard = {
   background:
     "rgba(255,255,255,0.03)",
+
   borderRadius: "24px",
+
   padding: "24px",
+
   backdropFilter:
     "blur(14px)",
+
   boxShadow:
     "0 10px 40px rgba(0,0,0,0.25)",
+
+  overflow: "hidden",
+
+  wordBreak:
+    "break-word" as const,
 };
 
 const scannerTop = {
