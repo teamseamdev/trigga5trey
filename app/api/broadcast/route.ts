@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import admin from "firebase-admin";
 
-/* 🔥 INIT */
+/* 🔥 FIREBASE INIT */
 
 if (!admin.apps.length) {
   const serviceAccount = JSON.parse(
-    process.env.FIREBASE_SERVICE_ACCOUNT || "{}"
+    process.env.FIREBASE_SERVICE_ACCOUNT!
   );
 
   admin.initializeApp({
