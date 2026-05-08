@@ -1,58 +1,83 @@
 import { NextResponse } from "next/server";
-import { AccessToken } from "livekit-server-sdk";
 
-export async function GET(req: Request) {
+import {
+  AccessToken,
+} from "livekit-server-sdk";
+
+export async function GET(
+  req: Request
+) {
   try {
-    const { searchParams } = new URL(req.url);
-
-    const identity =
-      searchParams.get("identity");
+    const { searchParams } =
+      new URL(req.url);
 
     const room =
       searchParams.get("room");
 
-    if (!identity || !room) {
+    const identity =
+      searchParams.get(
+        "identity"
+      );
+
+    if (!room || !identity) {
       return NextResponse.json(
-        { error: "Missing params" },
+        {
+          error:
+            "Missing room or identity",
+        },
         { status: 400 }
       );
     }
 
     const apiKey =
-      process.env.LIVEKIT_API_KEY;
+      process.env
+        .LIVEKIT_API_KEY;
 
     const apiSecret =
-      process.env.LIVEKIT_API_SECRET;
+      process.env
+        .LIVEKIT_API_SECRET;
 
-    if (!apiKey || !apiSecret) {
+    if (
+      !apiKey ||
+      !apiSecret
+    ) {
       return NextResponse.json(
-        { error: "Missing LiveKit env vars" },
+        {
+          error:
+            "Missing LiveKit env vars",
+        },
         { status: 500 }
       );
     }
 
-    const at = new AccessToken(
-      apiKey,
-      apiSecret,
-      {
-        identity,
-      }
-    );
+    /* 🔥 CREATE TOKEN */
+    const at =
+      new AccessToken(
+        apiKey,
+        apiSecret,
+        {
+          identity,
+        }
+      );
 
+    /* 🔥 ROOM GRANTS */
     at.addGrant({
-      room,
       roomJoin: true,
+      room,
+
       canPublish: true,
       canSubscribe: true,
+
+      canPublishData: true,
     });
 
+    /* 🔥 JWT */
     const token =
       await at.toJwt();
 
     return NextResponse.json({
       token,
     });
-
   } catch (err) {
     console.error(
       "LIVEKIT TOKEN ERROR:",
@@ -60,7 +85,10 @@ export async function GET(req: Request) {
     );
 
     return NextResponse.json(
-      { error: "Failed" },
+      {
+        error:
+          "Failed to generate token",
+      },
       { status: 500 }
     );
   }

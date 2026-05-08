@@ -30,6 +30,11 @@ export default function LivePage() {
   const [loading, setLoading] =
     useState(true);
 
+  const [
+    permissionsGranted,
+    setPermissionsGranted,
+  ] = useState(false);
+
   const room = "main-stream";
 
   /* 🔥 STABLE IDENTITY */
@@ -48,6 +53,7 @@ export default function LivePage() {
     process.env
       .NEXT_PUBLIC_LIVEKIT_URL!;
 
+  /* 🔥 FETCH TOKEN */
   useEffect(() => {
     const fetchToken =
       async () => {
@@ -59,10 +65,15 @@ export default function LivePage() {
           const data =
             await res.json();
 
+          console.log(
+            "🎟 Token response:",
+            data
+          );
+
           setToken(data.token);
         } catch (err) {
           console.error(
-            "Token fetch failed:",
+            "❌ Token fetch failed:",
             err
           );
         } finally {
@@ -73,6 +84,37 @@ export default function LivePage() {
     fetchToken();
   }, [identity]);
 
+  /* 🔥 ENABLE CAMERA/MIC */
+  const enableMedia =
+    async () => {
+      try {
+        await navigator.mediaDevices.getUserMedia(
+          {
+            video: true,
+            audio: true,
+          }
+        );
+
+        setPermissionsGranted(
+          true
+        );
+
+        console.log(
+          "✅ Media permissions granted"
+        );
+      } catch (err) {
+        console.error(
+          "❌ Media error:",
+          err
+        );
+
+        alert(
+          "Camera or microphone access denied."
+        );
+      }
+    };
+
+  /* 🔥 LOADING */
   if (loading) {
     return (
       <main
@@ -90,6 +132,7 @@ export default function LivePage() {
     );
   }
 
+  /* 🔥 FAILED */
   if (!token) {
     return (
       <main
@@ -153,6 +196,7 @@ export default function LivePage() {
 
         {canStream && (
           <button
+            onClick={enableMedia}
             style={{
               padding:
                 "12px 22px",
@@ -160,14 +204,18 @@ export default function LivePage() {
                 "14px",
               border: "none",
               background:
-                "linear-gradient(135deg, #ff2d2d 0%, #ff5a5a 100%)",
+                permissionsGranted
+                  ? "linear-gradient(135deg, #18c964 0%, #43e97b 100%)"
+                  : "linear-gradient(135deg, #ff2d2d 0%, #ff5a5a 100%)",
               color: "#fff",
               fontWeight: 800,
               cursor: "pointer",
               fontSize: "1rem",
             }}
           >
-            🔴 GO LIVE
+            {permissionsGranted
+              ? "🟢 LIVE ENABLED"
+              : "🔴 GO LIVE"}
           </button>
         )}
       </div>
@@ -184,17 +232,48 @@ export default function LivePage() {
             "1px solid rgba(255,255,255,0.08)",
           boxShadow:
             "0 20px 60px rgba(0,0,0,0.45)",
+          minHeight: "700px",
         }}
       >
-        <LiveKitRoom
-          serverUrl={serverUrl}
-          token={token}
-          connect={true}
-          audio={canStream}
-          video={canStream}
-        >
-          <VideoConference />
-        </LiveKitRoom>
+        {token && (
+          <LiveKitRoom
+            serverUrl={
+              serverUrl
+            }
+            token={token}
+            connect={true}
+            audio={
+              canStream &&
+              permissionsGranted
+            }
+            video={
+              canStream &&
+              permissionsGranted
+            }
+            data-lk-theme="default"
+            onConnected={() =>
+              console.log(
+                "✅ Connected to LiveKit"
+              )
+            }
+            onDisconnected={(
+              reason
+            ) =>
+              console.log(
+                "❌ Disconnected:",
+                reason
+              )
+            }
+            onError={(err) =>
+              console.error(
+                "🔥 LiveKit Error:",
+                err
+              )
+            }
+          >
+            <VideoConference />
+          </LiveKitRoom>
+        )}
       </div>
     </main>
   );
