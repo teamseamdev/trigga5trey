@@ -60,6 +60,14 @@ export default function Navbar() {
             />
 
             <NavLink
+              href="/live"
+              label="Live"
+              active={
+                pathname === "/live"
+              }
+            />
+
+            <NavLink
               href="/fqrp"
               label="FQRP"
               active={
@@ -79,26 +87,26 @@ export default function Navbar() {
             )}
           </nav>
 
-          {/* 🔥 DISCORD LOGIN */}
+          {/* 🔥 DESKTOP LOGIN */}
           <div className="desktop-login">
             <LoginButton />
           </div>
-        </div>
 
-        {/* 🔥 MOBILE MENU BUTTON */}
-        <button
-          onClick={() =>
-            setOpen(!open)
-          }
-          style={mobileButton}
-          className="mobile-menu-btn"
-        >
-          {open ? (
-            <X size={24} />
-          ) : (
-            <Menu size={24} />
-          )}
-        </button>
+          {/* 🔥 MOBILE MENU BUTTON */}
+          <button
+            className="mobile-menu-btn"
+            onClick={() =>
+              setOpen(!open)
+            }
+            style={mobileButton}
+          >
+            {open ? (
+              <X size={28} />
+            ) : (
+              <Menu size={28} />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* 🔥 MOBILE MENU */}
@@ -119,6 +127,12 @@ export default function Navbar() {
           <MobileLink
             href="/shop"
             label="Shop"
+            onClick={handleNavClick}
+          />
+
+          <MobileLink
+            href="/live"
+            label="Live"
             onClick={handleNavClick}
           />
 
