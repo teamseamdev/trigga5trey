@@ -9,67 +9,29 @@ import "@livekit/components-styles";
 
 import {
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
-import {
-  useSession,
-} from "next-auth/react";
-
-import { isStreamer } from "@/lib/isStreamer";
-
 export default function LivePage() {
-  const {
-    data: session,
-    status,
-  } = useSession();
-
   const [token, setToken] =
     useState("");
 
   const [loading, setLoading] =
     useState(true);
 
-  const [
-    permissionsGranted,
-    setPermissionsGranted,
-  ] = useState(false);
-
   const room = "main-stream";
 
-  /* 🔥 SESSION LOADING */
-  if (status === "loading") {
-    return (
-      <CenteredText text="Loading session..." />
-    );
-  }
-
-  /* 🔥 NOT LOGGED IN */
-  if (!session?.user) {
-    return (
-      <CenteredText text="You must be logged into Discord to access live streams." />
-    );
-  }
-
-  const canStream =
-    isStreamer(session.user);
-
-  const username =
-    (session.user as any)
-      ?.username ||
-    session.user.name ||
-    "user";
-
-  const identity =
-    canStream
-      ? `streamer-${username}`
-      : `viewer-${username}`;
+  const identity = useMemo(() => {
+    return `viewer-${Math.floor(
+      Math.random() * 99999
+    )}`;
+  }, []);
 
   const serverUrl =
     process.env
       .NEXT_PUBLIC_LIVEKIT_URL!;
 
-  /* 🔥 FETCH TOKEN */
   useEffect(() => {
     const fetchToken =
       async () => {
@@ -95,48 +57,23 @@ export default function LivePage() {
     fetchToken();
   }, [identity]);
 
-  /* 🔥 ENABLE MEDIA */
-  const enableMedia =
-    async () => {
-      if (!canStream) {
-        alert(
-          "You do not have streamer permissions."
-        );
-
-        return;
-      }
-
-      try {
-        await navigator.mediaDevices.getUserMedia(
-          {
-            video: true,
-            audio: true,
-          }
-        );
-
-        setPermissionsGranted(
-          true
-        );
-      } catch (err) {
-        console.error(err);
-
-        alert(
-          "Camera or microphone access denied."
-        );
-      }
-    };
-
-  /* 🔥 LOADING */
   if (loading) {
     return (
-      <CenteredText text="Connecting..." />
+      <main
+        style={loadingStyle}
+      >
+        Connecting...
+      </main>
     );
   }
 
-  /* 🔥 FAILED */
   if (!token) {
     return (
-      <CenteredText text="Failed to connect." />
+      <main
+        style={loadingStyle}
+      >
+        Failed to connect.
+      </main>
     );
   }
 
@@ -149,80 +86,22 @@ export default function LivePage() {
         padding: "20px",
       }}
     >
-      {/* 🔥 HEADER */}
       <div
         style={{
           maxWidth: "1400px",
           margin: "0 auto 20px",
-          display: "flex",
-          justifyContent:
-            "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "12px",
         }}
       >
-        <div>
-          <h1
-            style={{
-              fontSize: "2rem",
-              fontWeight: 900,
-              marginBottom: "6px",
-            }}
-          >
-            LIVE STREAM
-          </h1>
-
-          <p
-            style={{
-              opacity: 0.7,
-            }}
-          >
-            Logged in as{" "}
-            <strong>
-              {username}
-            </strong>
-          </p>
-
-          <p
-            style={{
-              opacity: 0.6,
-              marginTop: "6px",
-            }}
-          >
-            {canStream
-              ? "Streamer access enabled"
-              : "Viewer mode"}
-          </p>
-        </div>
-
-        {canStream && (
-          <button
-            onClick={enableMedia}
-            style={{
-              padding:
-                "12px 22px",
-              borderRadius:
-                "14px",
-              border: "none",
-              background:
-                permissionsGranted
-                  ? "linear-gradient(135deg, #18c964 0%, #43e97b 100%)"
-                  : "linear-gradient(135deg, #ff2d2d 0%, #ff5a5a 100%)",
-              color: "#fff",
-              fontWeight: 800,
-              cursor: "pointer",
-              fontSize: "1rem",
-            }}
-          >
-            {permissionsGranted
-              ? "🟢 LIVE ENABLED"
-              : "🔴 GO LIVE"}
-          </button>
-        )}
+        <h1
+          style={{
+            fontSize: "2rem",
+            fontWeight: 900,
+          }}
+        >
+          LIVE STREAM
+        </h1>
       </div>
 
-      {/* 🔥 PLAYER */}
       <div
         style={{
           width: "100%",
@@ -242,14 +121,8 @@ export default function LivePage() {
             serverUrl={serverUrl}
             token={token}
             connect={true}
-            audio={
-              canStream &&
-              permissionsGranted
-            }
-            video={
-              canStream &&
-              permissionsGranted
-            }
+            audio={true}
+            video={true}
             data-lk-theme="default"
           >
             <VideoConference />
@@ -260,26 +133,11 @@ export default function LivePage() {
   );
 }
 
-/* 🔥 CENTERED */
-function CenteredText({
-  text,
-}: {
-  text: string;
-}) {
-  return (
-    <main
-      style={{
-        height: "100vh",
-        background: "#000",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "#fff",
-        padding: "20px",
-        textAlign: "center",
-      }}
-    >
-      <h2>{text}</h2>
-    </main>
-  );
-}
+const loadingStyle = {
+  height: "100vh",
+  background: "#000",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "#fff",
+};

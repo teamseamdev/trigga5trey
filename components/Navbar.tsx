@@ -59,13 +59,15 @@ export default function Navbar() {
               }
             />
 
-            <NavLink
-              href="/live"
-              label="Live"
-              active={
-                pathname === "/live"
-              }
-            />
+            {session && (
+  <NavLink
+    href="/live"
+    label="Live"
+    active={
+      pathname === "/live"
+    }
+  />
+)}
 
             <NavLink
               href="/fqrp"
@@ -130,11 +132,13 @@ export default function Navbar() {
             onClick={handleNavClick}
           />
 
-          <MobileLink
-            href="/live"
-            label="Live"
-            onClick={handleNavClick}
-          />
+          {session && (
+  <MobileLink
+    href="/live"
+    label="Live"
+    onClick={handleNavClick}
+  />
+)}
 
           <MobileLink
             href="/fqrp"
