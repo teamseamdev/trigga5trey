@@ -1,38 +1,73 @@
 import { NextResponse } from "next/server";
 import admin from "firebase-admin";
 
-/* 🔥 INIT */
+/* 🔥 FIREBASE INIT */
+
 if (!admin.apps.length) {
+  const serviceAccount = JSON.parse(
+    process.env.FIREBASE_SERVICE_ACCOUNT || "{}"
+  );
+
   admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-    }),
+    credential: admin.credential.cert(
+      serviceAccount
+    ),
   });
 }
 
 const db = admin.firestore();
 
-/* 🔥 SAVE TOKEN */
+/* 🔥 SAVE PUSH TOKEN */
+
 export async function POST(req: Request) {
   try {
-    const { token } = await req.json();
+    const body = await req.json();
+
+    const token = body.token;
 
     if (!token) {
-      return NextResponse.json({ error: "No token" }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Missing token",
+        },
+        {
+          status: 400,
+        }
+      );
     }
 
-    await db.collection("tokens").doc(token).set({
-      token,
-      createdAt: Date.now(),
+    /* 🔥 SAVE TOKEN */
+
+    await db
+      .collection("tokens")
+      .doc(token)
+      .set({
+        createdAt:
+          admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+    console.log(
+      "✅ Token saved:",
+      token
+    );
+
+    return NextResponse.json({
+      success: true,
     });
-
-    console.log("💾 Saved token:", token);
-
-    return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("SAVE TOKEN ERROR:", err);
-    return NextResponse.json({ error: "Failed" }, { status: 500 });
+    console.error(
+      "SAVE TOKEN ERROR:",
+      err
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          "Failed to save token",
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }
