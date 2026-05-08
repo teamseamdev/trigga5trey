@@ -9,12 +9,10 @@ import "@livekit/components-styles";
 
 import {
   useEffect,
-  useMemo,
   useState,
 } from "react";
 
 import {
-  signIn,
   useSession,
 } from "next-auth/react";
 
@@ -39,46 +37,29 @@ export default function LivePage() {
 
   const room = "main-stream";
 
-  /* 🔥 REQUIRE LOGIN */
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      signIn("discord");
-    }
-  }, [status]);
-
-  /* 🔥 LOADING SESSION */
+  /* 🔥 SESSION LOADING */
   if (status === "loading") {
     return (
-      <main
-        style={loadingStyle}
-      >
-        Loading session...
-      </main>
+      <CenteredText text="Loading session..." />
     );
   }
 
-  /* 🔥 NO SESSION */
+  /* 🔥 NOT LOGGED IN */
   if (!session?.user) {
     return (
-      <main
-        style={loadingStyle}
-      >
-        Redirecting to Discord...
-      </main>
+      <CenteredText text="You must be logged into Discord to access live streams." />
     );
   }
 
   const canStream =
     isStreamer(session.user);
 
-  /* 🔥 DISCORD USERNAME */
   const username =
     (session.user as any)
       ?.username ||
     session.user.name ||
     "user";
 
-  /* 🔥 STABLE IDENTITY */
   const identity =
     canStream
       ? `streamer-${username}`
@@ -100,15 +81,10 @@ export default function LivePage() {
           const data =
             await res.json();
 
-          console.log(
-            "🎟 Token response:",
-            data
-          );
-
           setToken(data.token);
         } catch (err) {
           console.error(
-            "❌ Token fetch failed:",
+            "Token fetch failed:",
             err
           );
         } finally {
@@ -119,7 +95,7 @@ export default function LivePage() {
     fetchToken();
   }, [identity]);
 
-  /* 🔥 ENABLE STREAM */
+  /* 🔥 ENABLE MEDIA */
   const enableMedia =
     async () => {
       if (!canStream) {
@@ -141,15 +117,8 @@ export default function LivePage() {
         setPermissionsGranted(
           true
         );
-
-        console.log(
-          "✅ Media permissions granted"
-        );
       } catch (err) {
-        console.error(
-          "❌ Media error:",
-          err
-        );
+        console.error(err);
 
         alert(
           "Camera or microphone access denied."
@@ -160,22 +129,14 @@ export default function LivePage() {
   /* 🔥 LOADING */
   if (loading) {
     return (
-      <main
-        style={loadingStyle}
-      >
-        Connecting...
-      </main>
+      <CenteredText text="Connecting..." />
     );
   }
 
   /* 🔥 FAILED */
   if (!token) {
     return (
-      <main
-        style={loadingStyle}
-      >
-        Failed to connect.
-      </main>
+      <CenteredText text="Failed to connect." />
     );
   }
 
@@ -299,12 +260,26 @@ export default function LivePage() {
   );
 }
 
-/* 🔥 SHARED */
-const loadingStyle = {
-  height: "100vh",
-  background: "#000",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  color: "#fff",
-};
+/* 🔥 CENTERED */
+function CenteredText({
+  text,
+}: {
+  text: string;
+}) {
+  return (
+    <main
+      style={{
+        height: "100vh",
+        background: "#000",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#fff",
+        padding: "20px",
+        textAlign: "center",
+      }}
+    >
+      <h2>{text}</h2>
+    </main>
+  );
+}
