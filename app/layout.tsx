@@ -1,5 +1,12 @@
-import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type {
+  Metadata,
+  Viewport,
+} from "next";
+
+import {
+  Geist,
+  Geist_Mono,
+} from "next/font/google";
 
 import "./globals.css";
 
@@ -9,29 +16,40 @@ import InstallButton from "@/components/InstallButton";
 import SessionWrapper from "@/components/SessionWrapper";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
+  variable:
+    "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistMono =
+  Geist_Mono({
+    variable:
+      "--font-geist-mono",
+    subsets: ["latin"],
+  });
 
-export const metadata: Metadata = {
-  title: "TRIGGA5TREY",
-  description: "Official site",
-  manifest: "/manifest.json",
+export const metadata: Metadata =
+  {
+    title: "TRIGGA5TREY",
 
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
-  },
-};
+    description:
+      "Official site",
 
-export const viewport: Viewport = {
-  themeColor: "#000000",
-};
+    manifest:
+      "/manifest.json",
+
+    icons: {
+      icon: "/favicon.ico",
+
+      apple:
+        "/apple-touch-icon.png",
+    },
+  };
+
+export const viewport: Viewport =
+  {
+    themeColor: "#000000",
+  };
 
 export default function RootLayout({
   children,
@@ -41,8 +59,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* 🔥 IOS PWA */}
         <meta
           name="apple-mobile-web-app-capable"
+          content="yes"
+        />
+
+        <meta
+          name="mobile-web-app-capable"
           content="yes"
         />
 
@@ -56,6 +80,13 @@ export default function RootLayout({
           content="TRIGGA5TREY"
         />
 
+        {/* 🔥 PREVENT IOS ZOOM */}
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+        />
+
+        {/* 🔥 SPLASH */}
         <link
           rel="apple-touch-startup-image"
           href="/splash-1170x2532.png"
@@ -76,21 +107,38 @@ export default function RootLayout({
       </head>
 
       <body
+        suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable}`}
         style={{
           margin: 0,
-          backgroundColor: "#000",
-          backgroundImage: "url('/hero.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
+
+          backgroundColor:
+            "#000",
+
+          backgroundImage:
+            "url('/hero.jpg')",
+
+          backgroundSize:
+            "cover",
+
+          backgroundPosition:
+            "center",
+
+          backgroundAttachment:
+            "fixed",
+
+          minHeight: "100vh",
         }}
       >
+        {/* 🔥 SESSION PROVIDER */}
         <SessionWrapper>
           <div
             style={{
-              minHeight: "100vh",
-              background: "rgba(0,0,0,0.75)",
+              minHeight:
+                "100vh",
+
+              background:
+                "rgba(0,0,0,0.75)",
             }}
           >
             <Navbar />
