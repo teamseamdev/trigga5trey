@@ -19,15 +19,10 @@ const db = admin.firestore();
 
 /* 🔥 BROADCAST */
 
-export async function POST(
-  req: Request
-) {
+export async function POST(req: Request) {
   try {
-    const {
-      title,
-      body,
-      url,
-    } = await req.json();
+    const { title, body, url } =
+      await req.json();
 
     if (!title || !body) {
       return NextResponse.json(
@@ -75,13 +70,9 @@ export async function POST(
             body,
           },
 
-          /* 🔥 Deep linking */
-
           data: {
             url: url || "/",
           },
-
-          /* 🔥 iOS-safe webpush */
 
           webpush: {
             headers: {
@@ -95,16 +86,9 @@ export async function POST(
           },
         });
 
-    /* 🔥 Cleanup invalid tokens */
-
     response.responses.forEach(
       async (resp, idx) => {
         if (!resp.success) {
-          console.log(
-            "❌ Removing invalid token:",
-            tokens[idx]
-          );
-
           try {
             await db
               .collection(
@@ -112,17 +96,12 @@ export async function POST(
               )
               .doc(tokens[idx])
               .delete();
-          } catch (deleteErr) {
-            console.error(
-              "Token delete error:",
-              deleteErr
-            );
+          } catch (err) {
+            console.error(err);
           }
         }
       }
     );
-
-    /* 🔥 Analytics log */
 
     await db
       .collection(
@@ -130,49 +109,31 @@ export async function POST(
       )
       .add({
         type: "broadcast",
-
         title,
-
         body,
-
         url: url || "/",
-
         sent:
           response.successCount,
-
         failed:
           response.failureCount,
-
         createdAt:
           admin.firestore.FieldValue.serverTimestamp(),
       });
-
-    /* 🔥 Activity feed */
 
     await db
       .collection("activity")
       .add({
         type: "broadcast",
-
         title,
-
         body,
-
         createdAt:
           admin.firestore.FieldValue.serverTimestamp(),
       });
 
-    console.log(
-      "📢 Sent to:",
-      response.successCount
-    );
-
     return NextResponse.json({
       success: true,
-
       sent:
         response.successCount,
-
       failed:
         response.failureCount,
     });
