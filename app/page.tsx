@@ -4,6 +4,7 @@ import { isTwitchLive } from "@/lib/twitch";
 import TwitchPlayer from "@/components/TwitchPlayer";
 import PushNotifications from "@/components/PushNotifications";
 import { CSSProperties } from "react";
+import SyncRunner from "@/components/SyncRunner";
 
 const FORCE_LIVE = false;
 
@@ -13,16 +14,18 @@ export default async function Home() {
     (await isTwitchLive("trigga5trey"));
 
   return (
-    <main style={main}>
-      <div style={backgroundAccent} />
+  <main style={main}>
+    <SyncRunner />
 
-      {/* 🔴 LIVE STREAM SECTION */}
-      {isLive && <LiveStreamSection />}
+    <div style={backgroundAccent} />
 
-      {/* ⚫ NORMAL HERO */}
-      <OfflineHero />
-    </main>
-  );
+    {/* 🔴 LIVE STREAM SECTION */}
+    {isLive && <LiveStreamSection />}
+
+    {/* ⚫ NORMAL HERO */}
+    <OfflineHero />
+  </main>
+);
 }
 
 /* 🔴 LIVE STREAM SECTION */
