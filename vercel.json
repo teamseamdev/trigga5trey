@@ -2,15 +2,15 @@
   "crons": [
     {
       "path": "/api/live-check",
-      "schedule": "0 */1 * * * *"
+      "schedule": "*/1 * * * *"
     },
     {
       "path": "/api/discord-sync",
-      "schedule": "0 */1 * * * *"
+      "schedule": "*/1 * * * *"
     },
     {
       "path": "/api/scanner-sync",
-      "schedule": "0 */1 * * * *"
+      "schedule": "*/1 * * * *"
     }
   ]
 }
