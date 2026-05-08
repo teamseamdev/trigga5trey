@@ -7,7 +7,11 @@ import {
 
 import "@livekit/components-styles";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { useSession } from "next-auth/react";
 
@@ -28,11 +32,17 @@ export default function LivePage() {
 
   const room = "main-stream";
 
-  const identity = canStream
-    ? `streamer-${session?.user?.name || "creator"}`
-    : `viewer-${Math.floor(
-        Math.random() * 99999
-      )}`;
+  /* 🔥 STABLE IDENTITY */
+  const identity = useMemo(() => {
+    return canStream
+      ? `streamer-${
+          session?.user?.name ||
+          "creator"
+        }`
+      : `viewer-${Math.floor(
+          Math.random() * 99999
+        )}`;
+  }, [canStream, session]);
 
   const serverUrl =
     process.env
@@ -73,7 +83,6 @@ export default function LivePage() {
           alignItems: "center",
           justifyContent: "center",
           color: "#fff",
-          fontSize: "1.2rem",
         }}
       >
         Connecting...
@@ -107,7 +116,7 @@ export default function LivePage() {
         padding: "20px",
       }}
     >
-      {/* 🔴 HEADER */}
+      {/* 🔥 HEADER */}
       <div
         style={{
           maxWidth: "1400px",
@@ -137,27 +146,29 @@ export default function LivePage() {
             }}
           >
             {canStream
-              ? "You are in streamer mode"
-              : "Watching live stream"}
+              ? "Streamer mode enabled"
+              : "Viewer mode"}
           </p>
         </div>
 
         {canStream && (
-          <div
+          <button
             style={{
               padding:
-                "10px 18px",
+                "12px 22px",
               borderRadius:
-                "999px",
+                "14px",
+              border: "none",
               background:
-                "rgba(255,45,45,0.15)",
-              border:
-                "1px solid rgba(255,45,45,0.35)",
-              fontWeight: 700,
+                "linear-gradient(135deg, #ff2d2d 0%, #ff5a5a 100%)",
+              color: "#fff",
+              fontWeight: 800,
+              cursor: "pointer",
+              fontSize: "1rem",
             }}
           >
-            🔴 STREAMER MODE
-          </div>
+            🔴 GO LIVE
+          </button>
         )}
       </div>
 
