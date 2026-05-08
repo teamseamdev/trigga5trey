@@ -6,6 +6,7 @@ import {
 } from "@livekit/components-react";
 
 import "@livekit/components-styles";
+import { isStreamer } from "@/lib/isStreamer";
 
 import {
   useEffect,

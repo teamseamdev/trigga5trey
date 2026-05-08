@@ -1,17 +1,14 @@
+const STREAMER_ROLE_IDS = [
+  "1502329468432416798"
+];
+
 export function isStreamer(
   user: any
 ) {
-  const streamerRole =
-    process.env
-      .NEXT_PUBLIC_DISCORD_STREAMER_ROLE_ID;
+  if (!user?.roles) return false;
 
-  if (!streamerRole)
-    return false;
-
-  const roles =
-    user?.roles || [];
-
-  return roles.includes(
-    streamerRole
+  return user.roles.some(
+    (role: string) =>
+      STREAMER_ROLE_IDS.includes(role)
   );
 }

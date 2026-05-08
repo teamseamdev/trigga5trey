@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 
-import { Menu, X } from "lucide-react";
+import {
+  Menu,
+  X,
+} from "lucide-react";
 
 import { usePathname } from "next/navigation";
 
@@ -14,7 +17,8 @@ export default function Navbar() {
   const [open, setOpen] =
     useState(false);
 
-  const pathname = usePathname();
+  const pathname =
+    usePathname();
 
   const { data: session } =
     useSession();
@@ -24,7 +28,8 @@ export default function Navbar() {
 
   /* 🔥 ADMIN CHECK */
   const isAdmin = Boolean(
-    (session?.user as any)?.isAdmin
+    (session?.user as any)
+      ?.isAdmin
   );
 
   return (
@@ -40,14 +45,17 @@ export default function Navbar() {
             <NavLink
               href="/"
               label="Home"
-              active={pathname === "/"}
+              active={
+                pathname === "/"
+              }
             />
 
             <NavLink
               href="/socials"
               label="Socials"
               active={
-                pathname === "/socials"
+                pathname ===
+                "/socials"
               }
             />
 
@@ -55,25 +63,29 @@ export default function Navbar() {
               href="/shop"
               label="Shop"
               active={
-                pathname === "/shop"
+                pathname ===
+                "/shop"
               }
             />
 
+            {/* 🔥 LIVE ONLY WHEN LOGGED IN */}
             {session && (
-  <NavLink
-    href="/live"
-    label="Live"
-    active={
-      pathname === "/live"
-    }
-  />
-)}
+              <NavLink
+                href="/live"
+                label="Live"
+                active={
+                  pathname ===
+                  "/live"
+                }
+              />
+            )}
 
             <NavLink
               href="/fqrp"
               label="FQRP"
               active={
-                pathname === "/fqrp"
+                pathname ===
+                "/fqrp"
               }
             />
 
@@ -83,7 +95,8 @@ export default function Navbar() {
                 href="/admin"
                 label="Admin"
                 active={
-                  pathname === "/admin"
+                  pathname ===
+                  "/admin"
                 }
               />
             )}
@@ -117,33 +130,44 @@ export default function Navbar() {
           <MobileLink
             href="/"
             label="Home"
-            onClick={handleNavClick}
+            onClick={
+              handleNavClick
+            }
           />
 
           <MobileLink
             href="/socials"
             label="Socials"
-            onClick={handleNavClick}
+            onClick={
+              handleNavClick
+            }
           />
 
           <MobileLink
             href="/shop"
             label="Shop"
-            onClick={handleNavClick}
+            onClick={
+              handleNavClick
+            }
           />
 
+          {/* 🔥 LIVE ONLY WHEN LOGGED IN */}
           {session && (
-  <MobileLink
-    href="/live"
-    label="Live"
-    onClick={handleNavClick}
-  />
-)}
+            <MobileLink
+              href="/live"
+              label="Live"
+              onClick={
+                handleNavClick
+              }
+            />
+          )}
 
           <MobileLink
             href="/fqrp"
             label="FQRP"
-            onClick={handleNavClick}
+            onClick={
+              handleNavClick
+            }
           />
 
           {/* 🔥 ADMIN ONLY */}
@@ -224,13 +248,15 @@ function NavLink({
           ? "#fff"
           : "#8d8d8d",
 
-        textDecoration: "none",
+        textDecoration:
+          "none",
 
         fontWeight: active
           ? 700
           : 500,
 
-        transition: "0.2s ease",
+        transition:
+          "0.2s ease",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.color =
@@ -266,7 +292,8 @@ function MobileLink({
       style={{
         color: "#fff",
 
-        textDecoration: "none",
+        textDecoration:
+          "none",
 
         fontSize: "1.1rem",
 
@@ -290,7 +317,8 @@ const header = {
   background:
     "rgba(0,0,0,0.65)",
 
-  backdropFilter: "blur(18px)",
+  backdropFilter:
+    "blur(18px)",
 
   borderBottom:
     "1px solid rgba(255,255,255,0.06)",
@@ -305,7 +333,8 @@ const navWrapper = {
 
   display: "flex",
 
-  justifyContent: "space-between",
+  justifyContent:
+    "space-between",
 
   alignItems: "center",
 };
@@ -351,7 +380,8 @@ const mobileMenu = {
 
   display: "flex",
 
-  flexDirection: "column" as const,
+  flexDirection:
+    "column" as const,
 
   gap: "18px",
 };
