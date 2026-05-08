@@ -1,109 +1,142 @@
 import { NextResponse } from "next/server";
 import admin from "firebase-admin";
 
-/* 🔥 LAZY INIT (SAFE FOR NEXT BUILD) */
+/* 🔥 LAZY INIT */
 function initFirebase() {
   if (admin.apps.length) return;
 
-  const projectId = process.env.FIREBASE_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  const serviceAccount =
+    process.env.FIREBASE_SERVICE_ACCOUNT;
 
-  if (!projectId || !clientEmail || !privateKey) {
-    console.warn("⚠️ Missing Firebase env vars", {
-      projectId: !!projectId,
-      clientEmail: !!clientEmail,
-      privateKey: !!privateKey,
-    });
+  if (!serviceAccount) {
+    console.warn(
+      "⚠️ Missing FIREBASE_SERVICE_ACCOUNT"
+    );
 
     return;
   }
 
   try {
     admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId,
-        clientEmail,
-        privateKey: privateKey.replace(/\\n/g, "\n"),
-      }),
+      credential: admin.credential.cert(
+        JSON.parse(serviceAccount)
+      ),
     });
 
-    console.log("🔥 Firebase initialized");
+    console.log(
+      "🔥 Firebase initialized"
+    );
   } catch (err) {
-    console.error("❌ Firebase init error:", err);
+    console.error(
+      "❌ Firebase init error:",
+      err
+    );
   }
 }
 
 /* 🔥 API ROUTE */
-export async function POST(req: Request) {
+
+export async function POST(
+  req: Request
+) {
   try {
     initFirebase();
 
     if (!admin.apps.length) {
       return NextResponse.json(
-        { error: "Firebase not initialized" },
+        {
+          error:
+            "Firebase not initialized",
+        },
         { status: 500 }
       );
     }
 
     const data = await req.json();
 
-    console.log("📨 Incoming request:", data);
+    console.log(
+      "📨 Incoming request:",
+      data
+    );
 
-    let { token, title, body, url } = data;
+    let {
+      token,
+      title,
+      body,
+      url,
+    } = data;
 
-    /* 🔥 HARD CLEAN TOKEN */
     token = (token || "")
       .trim()
       .replace(/\s+/g, "")
-      .replace(/[^\x00-\x7F]/g, "");
+      .replace(
+        /[^\x00-\x7F]/g,
+        ""
+      );
 
-    if (!token || !title || !body) {
+    if (
+      !token ||
+      !title ||
+      !body
+    ) {
       return NextResponse.json(
-        { error: "Missing fields" },
+        {
+          error:
+            "Missing fields",
+        },
         { status: 400 }
       );
     }
 
-    const response = await admin.messaging().send({
-      token,
+    const response =
+      await admin
+        .messaging()
+        .send({
+          token,
 
-      notification: {
-        title,
-        body,
-      },
+          notification: {
+            title,
+            body,
+          },
 
-      /* 🔥 Deep linking */
-      data: {
-        url: url || "/",
-      },
+          data: {
+            url: url || "/",
+          },
 
-      /* 🔥 iOS-safe webpush */
-      webpush: {
-        headers: {
-          Urgency: "high",
-        },
+          webpush: {
+            headers: {
+              Urgency: "high",
+            },
 
-        notification: {
-          icon: "/icon-512.png",
-        },
-      },
-    });
+            notification: {
+              icon:
+                "/icon-512.png",
+            },
+          },
+        });
 
-    console.log("✅ Sent successfully:", response);
+    console.log(
+      "✅ Sent successfully:",
+      response
+    );
 
     return NextResponse.json({
       success: true,
       response,
     });
-
   } catch (err: any) {
-    console.error("🔥 SEND ERROR:", err?.message || err);
+    console.error(
+      "🔥 SEND ERROR:",
+      err?.message || err
+    );
 
     return NextResponse.json(
       {
-        error: "Failed to send",
-        details: err?.message || "Unknown error",
+        error:
+          "Failed to send",
+        details:
+          err?.message ||
+          "Unknown error",
       },
       { status: 500 }
     );
