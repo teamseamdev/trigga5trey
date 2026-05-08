@@ -13,16 +13,18 @@ import {
   useState,
 } from "react";
 
-import { useSession } from "next-auth/react";
+import {
+  signIn,
+  useSession,
+} from "next-auth/react";
 
 import { isStreamer } from "@/lib/isStreamer";
 
 export default function LivePage() {
-  const { data: session } =
-    useSession();
-
-  const canStream =
-    isStreamer(session?.user);
+  const {
+    data: session,
+    status,
+  } = useSession();
 
   const [token, setToken] =
     useState("");
@@ -37,17 +39,50 @@ export default function LivePage() {
 
   const room = "main-stream";
 
+  /* 🔥 REQUIRE LOGIN */
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      signIn("discord");
+    }
+  }, [status]);
+
+  /* 🔥 LOADING SESSION */
+  if (status === "loading") {
+    return (
+      <main
+        style={loadingStyle}
+      >
+        Loading session...
+      </main>
+    );
+  }
+
+  /* 🔥 NO SESSION */
+  if (!session?.user) {
+    return (
+      <main
+        style={loadingStyle}
+      >
+        Redirecting to Discord...
+      </main>
+    );
+  }
+
+  const canStream =
+    isStreamer(session.user);
+
+  /* 🔥 DISCORD USERNAME */
+  const username =
+    (session.user as any)
+      ?.username ||
+    session.user.name ||
+    "user";
+
   /* 🔥 STABLE IDENTITY */
-  const identity = useMemo(() => {
-    return canStream
-      ? `streamer-${
-          session?.user?.name ||
-          "creator"
-        }`
-      : `viewer-${Math.floor(
-          Math.random() * 99999
-        )}`;
-  }, [canStream, session]);
+  const identity =
+    canStream
+      ? `streamer-${username}`
+      : `viewer-${username}`;
 
   const serverUrl =
     process.env
@@ -84,9 +119,17 @@ export default function LivePage() {
     fetchToken();
   }, [identity]);
 
-  /* 🔥 ENABLE CAMERA/MIC */
+  /* 🔥 ENABLE STREAM */
   const enableMedia =
     async () => {
+      if (!canStream) {
+        alert(
+          "You do not have streamer permissions."
+        );
+
+        return;
+      }
+
       try {
         await navigator.mediaDevices.getUserMedia(
           {
@@ -118,14 +161,7 @@ export default function LivePage() {
   if (loading) {
     return (
       <main
-        style={{
-          height: "100vh",
-          background: "#000",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#fff",
-        }}
+        style={loadingStyle}
       >
         Connecting...
       </main>
@@ -136,14 +172,7 @@ export default function LivePage() {
   if (!token) {
     return (
       <main
-        style={{
-          height: "100vh",
-          background: "#000",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#fff",
-        }}
+        style={loadingStyle}
       >
         Failed to connect.
       </main>
@@ -188,8 +217,20 @@ export default function LivePage() {
               opacity: 0.7,
             }}
           >
+            Logged in as{" "}
+            <strong>
+              {username}
+            </strong>
+          </p>
+
+          <p
+            style={{
+              opacity: 0.6,
+              marginTop: "6px",
+            }}
+          >
             {canStream
-              ? "Streamer mode enabled"
+              ? "Streamer access enabled"
               : "Viewer mode"}
           </p>
         </div>
@@ -237,9 +278,7 @@ export default function LivePage() {
       >
         {token && (
           <LiveKitRoom
-            serverUrl={
-              serverUrl
-            }
+            serverUrl={serverUrl}
             token={token}
             connect={true}
             audio={
@@ -251,25 +290,6 @@ export default function LivePage() {
               permissionsGranted
             }
             data-lk-theme="default"
-            onConnected={() =>
-              console.log(
-                "✅ Connected to LiveKit"
-              )
-            }
-            onDisconnected={(
-              reason
-            ) =>
-              console.log(
-                "❌ Disconnected:",
-                reason
-              )
-            }
-            onError={(err) =>
-              console.error(
-                "🔥 LiveKit Error:",
-                err
-              )
-            }
           >
             <VideoConference />
           </LiveKitRoom>
@@ -278,3 +298,13 @@ export default function LivePage() {
     </main>
   );
 }
+
+/* 🔥 SHARED */
+const loadingStyle = {
+  height: "100vh",
+  background: "#000",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "#fff",
+};
