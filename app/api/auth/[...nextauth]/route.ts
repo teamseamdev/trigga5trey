@@ -24,7 +24,12 @@ const handler = NextAuth({
           .DISCORD_CLIENT_SECRET!,
 
       authorization:
-        "https://discord.com/api/oauth2/authorize?scope=identify guilds guilds.members.read",
+        {
+          params: {
+            scope:
+              "identify guilds guilds.members.read",
+          },
+        },
     }),
   ],
 
@@ -41,67 +46,108 @@ const handler = NextAuth({
       account,
       profile,
     }) {
-      /* 🔥 INITIAL LOGIN */
-      if (account && profile) {
-        token.discordId = (
-          profile as any
-        ).id;
+      /* 🔥 KEEP EXISTING TOKEN */
+      if (!account) {
+        return token;
+      }
 
-        token.username = (
-          profile as any
-        ).username;
+      /* 🔥 BASIC USER INFO */
+      token.discordId = (
+        profile as any
+      )?.id;
 
-        token.avatar = (
-          profile as any
-        ).avatar;
+      token.username = (
+        profile as any
+      )?.username;
 
-        /* 🔥 FETCH MEMBER ROLES */
-        try {
-          const res = await fetch(
-            `https://discord.com/api/v10/users/@me/guilds/${GUILD_ID}/member`,
-            {
-              headers: {
-                Authorization: `Bearer ${account.access_token}`,
-              },
-            }
-          );
+      token.avatar = (
+        profile as any
+      )?.avatar;
 
-          if (res.ok) {
-            const member =
-              await res.json();
+      token.accessToken =
+        account.access_token;
 
-            const roles =
-              member.roles || [];
+      /* 🔥 DEFAULTS */
+      token.roles = [];
 
-            token.roles = roles;
+      token.isAdmin = false;
 
-            /* 🔥 ADMIN CHECK */
-            token.isAdmin =
-              roles.some(
-                (roleId: string) =>
-                  ADMIN_ROLE_IDS.includes(
-                    roleId
-                  )
-              );
-          } else {
-            console.error(
-              "Failed to fetch guild member"
-            );
+      /* 🔥 FETCH MEMBER */
+      try {
+        console.log(
+          "🔥 Fetching Discord member..."
+        );
 
-            token.roles = [];
+        console.log(
+          "🔥 Guild ID:",
+          GUILD_ID
+        );
 
-            token.isAdmin = false;
+        const res = await fetch(
+          `https://discord.com/api/v10/users/@me/guilds/${GUILD_ID}/member`,
+          {
+            headers: {
+              Authorization: `Bearer ${account.access_token}`,
+            },
+
+            cache: "no-store",
           }
-        } catch (err) {
+        );
+
+        console.log(
+          "🔥 Discord status:",
+          res.status
+        );
+
+        if (!res.ok) {
+          const text =
+            await res.text();
+
           console.error(
-            "Discord role fetch error:",
-            err
+            "❌ Failed member fetch:",
+            text
           );
 
-          token.roles = [];
-
-          token.isAdmin = false;
+          return token;
         }
+
+        const member =
+          await res.json();
+
+        console.log(
+          "🔥 DISCORD MEMBER:",
+          member
+        );
+
+        console.log(
+          "🔥 ROLES:",
+          member.roles
+        );
+
+        const roles =
+          member.roles || [];
+
+        token.roles = roles;
+
+        /* 🔥 ADMIN CHECK */
+        token.isAdmin =
+          roles.some(
+            (roleId: string) =>
+              ADMIN_ROLE_IDS.includes(
+                roleId
+              )
+          );
+
+        console.log(
+          "🔥 IS ADMIN:",
+          token.isAdmin
+        );
+
+      } catch (err) {
+        console.error(
+          "❌ Discord role fetch error:",
+          err
+        );
       }
 
       return token;
