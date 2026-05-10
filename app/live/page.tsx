@@ -391,22 +391,10 @@ export default function LivePage() {
     position:
       "relative",
 
-    height:
-      isMobile
-        ? canStream
-          ? "220px"
-          : "340px"
-        : "100%",
-
     minHeight:
       isMobile
-        ? canStream
-          ? "220px"
-          : "340px"
+        ? "260px"
         : "100%",
-
-    transition:
-      "all 0.25s ease",
   }}
 >
   <LivePlayer />
