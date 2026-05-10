@@ -24,6 +24,8 @@ type ChatMessage = {
   message: string;
 
   timestamp: number;
+
+  localId?: string;
 };
 
 export default function LiveChat() {
@@ -85,10 +87,29 @@ export default function LiveChat() {
           }
 
           setMessages(
-            (prev) => [
-              ...prev,
-              parsed,
-            ]
+            (prev) => {
+              const alreadyExists =
+                prev.some(
+                  (msg) =>
+                    msg.timestamp ===
+                      parsed.timestamp &&
+                    msg.user ===
+                      parsed.user &&
+                    msg.message ===
+                      parsed.message
+                );
+
+              if (
+                alreadyExists
+              ) {
+                return prev;
+              }
+
+              return [
+                ...prev,
+                parsed,
+              ];
+            }
           );
         } catch (err) {
           console.error(
@@ -126,7 +147,8 @@ export default function LiveChat() {
           user:
             session?.user
               ?.name ||
-            room.localParticipant
+            room
+              .localParticipant
               .identity ||
             "Anonymous",
 
@@ -143,6 +165,20 @@ export default function LiveChat() {
               messageData
             )
           )
+        );
+
+        /* 🔥 LOCAL INSTANT MESSAGE */
+
+        setMessages(
+          (prev) => [
+            ...prev,
+            {
+              ...messageData,
+
+              localId:
+                crypto.randomUUID(),
+            },
+          ]
         );
 
         setInput("");
@@ -248,9 +284,15 @@ export default function LiveChat() {
         )}
 
         {messages.map(
-          (msg, index) => (
+          (
+            msg,
+            index
+          ) => (
             <div
-              key={`${msg.timestamp}-${index}`}
+              key={
+                msg.localId ||
+                `${msg.timestamp}-${index}`
+              }
               style={{
                 wordBreak:
                   "break-word",
