@@ -22,6 +22,21 @@ export default function StreamerControls({
   const [live, setLive] =
     useState(false);
 
+  const [micEnabled, setMicEnabled] =
+    useState(true);
+
+  const [
+    cameraEnabled,
+    setCameraEnabled,
+  ] = useState(true);
+
+  const [
+    frontCamera,
+    setFrontCamera,
+  ] = useState(true);
+
+  /* 🔥 START STREAM */
+
   const startStream =
     async () => {
       if (!canStream) {
@@ -36,18 +51,18 @@ export default function StreamerControls({
         setLoading(true);
 
         console.log(
+          "🔥 STARTING STREAM"
+        );
+
+        console.log(
           "🔥 ROOM:",
           room
         );
 
         console.log(
-          "🔥 LOCAL PARTICIPANT:",
-          room.localParticipant
-        );
-
-        console.log(
           "🔥 IDENTITY:",
-          room.localParticipant.identity
+          room.localParticipant
+            .identity
         );
 
         const devices =
@@ -58,6 +73,8 @@ export default function StreamerControls({
           devices
         );
 
+        /* 🎤 ENABLE MIC */
+
         await room.localParticipant.setMicrophoneEnabled(
           true
         );
@@ -65,6 +82,8 @@ export default function StreamerControls({
         console.log(
           "✅ MIC ENABLED"
         );
+
+        /* 📷 ENABLE CAMERA */
 
         await room.localParticipant.setCameraEnabled(
           true
@@ -75,6 +94,10 @@ export default function StreamerControls({
         );
 
         setLive(true);
+
+        setMicEnabled(true);
+
+        setCameraEnabled(true);
 
         console.log(
           "🚀 STREAM LIVE"
@@ -99,43 +122,254 @@ export default function StreamerControls({
       }
     };
 
+  /* 🔥 END STREAM */
+
+  const endStream =
+    async () => {
+      try {
+        await room.localParticipant.setMicrophoneEnabled(
+          false
+        );
+
+        await room.localParticipant.setCameraEnabled(
+          false
+        );
+
+        setLive(false);
+
+        setMicEnabled(false);
+
+        setCameraEnabled(false);
+
+        console.log(
+          "🛑 STREAM ENDED"
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+  /* 🔥 TOGGLE MIC */
+
+  const toggleMic =
+    async () => {
+      try {
+        const next =
+          !micEnabled;
+
+        await room.localParticipant.setMicrophoneEnabled(
+          next
+        );
+
+        setMicEnabled(next);
+
+        console.log(
+          next
+            ? "🎤 MIC ON"
+            : "🔇 MIC OFF"
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+  /* 🔥 TOGGLE CAMERA */
+
+  const toggleCamera =
+    async () => {
+      try {
+        const next =
+          !cameraEnabled;
+
+        await room.localParticipant.setCameraEnabled(
+          next
+        );
+
+        setCameraEnabled(
+          next
+        );
+
+        console.log(
+          next
+            ? "📷 CAMERA ON"
+            : "📷 CAMERA OFF"
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+  /* 🔥 FLIP CAMERA */
+
+  const flipCamera =
+    async () => {
+      try {
+        const nextFront =
+          !frontCamera;
+
+        await room.localParticipant.setCameraEnabled(
+          false
+        );
+
+        await room.localParticipant.setCameraEnabled(
+          true,
+          {
+            facingMode:
+              nextFront
+                ? "user"
+                : "environment",
+          }
+        );
+
+        setFrontCamera(
+          nextFront
+        );
+
+        console.log(
+          nextFront
+            ? "🤳 FRONT CAMERA"
+            : "📷 REAR CAMERA"
+        );
+      } catch (err) {
+        console.error(
+          "❌ CAMERA FLIP FAILED",
+          err
+        );
+      }
+    };
+
   if (!canStream) {
     return null;
   }
 
   return (
-    <button
-      onClick={startStream}
-      disabled={
-        loading || live
-      }
+    <div
       style={{
-        padding:
-          "14px 22px",
+        display: "flex",
 
-        borderRadius:
-          "14px",
+        flexWrap: "wrap",
 
-        border: "none",
+        gap: "12px",
 
-        background: live
-          ? "#18c964"
-          : "#ff2d2d",
-
-        color: "#fff",
-
-        fontWeight: 800,
-
-        fontSize: "1rem",
-
-        cursor: "pointer",
+        alignItems: "center",
       }}
     >
-      {loading
-        ? "Starting..."
-        : live
-        ? "🟢 LIVE"
-        : "🔴 GO LIVE"}
-    </button>
+      {/* 🔴 GO LIVE */}
+
+      {!live && (
+        <button
+          onClick={
+            startStream
+          }
+          disabled={
+            loading
+          }
+          style={{
+            ...buttonStyle,
+
+            background:
+              "#ff2d2d",
+          }}
+        >
+          {loading
+            ? "Starting..."
+            : "🔴 GO LIVE"}
+        </button>
+      )}
+
+      {/* 🛑 END */}
+
+      {live && (
+        <>
+          <button
+            onClick={
+              endStream
+            }
+            style={{
+              ...buttonStyle,
+
+              background:
+                "#444",
+            }}
+          >
+            🛑 END
+          </button>
+
+          {/* 🎤 MIC */}
+
+          <button
+            onClick={
+              toggleMic
+            }
+            style={{
+              ...buttonStyle,
+
+              background:
+                micEnabled
+                  ? "#18c964"
+                  : "#ff2d2d",
+            }}
+          >
+            {micEnabled
+              ? "🎤 MIC ON"
+              : "🔇 MIC OFF"}
+          </button>
+
+          {/* 📷 CAMERA */}
+
+          <button
+            onClick={
+              toggleCamera
+            }
+            style={{
+              ...buttonStyle,
+
+              background:
+                cameraEnabled
+                  ? "#18c964"
+                  : "#ff2d2d",
+            }}
+          >
+            {cameraEnabled
+              ? "📷 CAMERA ON"
+              : "📷 CAMERA OFF"}
+          </button>
+
+          {/* 🔄 FLIP */}
+
+          <button
+            onClick={
+              flipCamera
+            }
+            style={{
+              ...buttonStyle,
+
+              background:
+                "#0070f3",
+            }}
+          >
+            🔄 FLIP
+          </button>
+        </>
+      )}
+    </div>
   );
 }
+
+/* 🔥 BUTTON STYLE */
+
+const buttonStyle = {
+  padding: "14px 22px",
+
+  borderRadius: "14px",
+
+  border: "none",
+
+  color: "#fff",
+
+  fontWeight: 800,
+
+  fontSize: "1rem",
+
+  cursor: "pointer",
+} as const;
