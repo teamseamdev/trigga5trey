@@ -1,12 +1,11 @@
 "use client";
 
 import {
-  useEffect,
   useState,
 } from "react";
 
 import {
-  useLocalParticipant,
+  useRoomContext,
 } from "@livekit/components-react";
 
 export default function StreamerControls({
@@ -14,28 +13,20 @@ export default function StreamerControls({
 }: {
   canStream: boolean;
 }) {
-  const {
-    localParticipant,
-  } = useLocalParticipant();
-
-  const [live, setLive] =
-    useState(false);
+  const room =
+    useRoomContext();
 
   const [loading, setLoading] =
     useState(false);
 
-  useEffect(() => {
-    console.log(
-      "🎤 STREAMER READY:",
-      localParticipant?.identity
-    );
-  }, [localParticipant]);
+  const [live, setLive] =
+    useState(false);
 
   const startStream =
     async () => {
       if (!canStream) {
         alert(
-          "You do not have streamer permissions."
+          "No streamer permissions"
         );
 
         return;
@@ -45,10 +36,29 @@ export default function StreamerControls({
         setLoading(true);
 
         console.log(
-          "🔥 STARTING STREAM"
+          "🔥 ROOM:",
+          room
         );
 
-        await localParticipant.setMicrophoneEnabled(
+        console.log(
+          "🔥 LOCAL PARTICIPANT:",
+          room.localParticipant
+        );
+
+        console.log(
+          "🔥 IDENTITY:",
+          room.localParticipant.identity
+        );
+
+        const devices =
+          await navigator.mediaDevices.enumerateDevices();
+
+        console.log(
+          "🎤 DEVICES:",
+          devices
+        );
+
+        await room.localParticipant.setMicrophoneEnabled(
           true
         );
 
@@ -56,7 +66,7 @@ export default function StreamerControls({
           "✅ MIC ENABLED"
         );
 
-        await localParticipant.setCameraEnabled(
+        await room.localParticipant.setCameraEnabled(
           true
         );
 
