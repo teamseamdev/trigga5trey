@@ -34,43 +34,10 @@ export default function LivePage() {
   const [loading, setLoading] =
     useState(true);
 
-  /* 🔥 WAIT FOR AUTH */
-
-  if (status === "loading") {
-    return (
-      <main
-        style={loadingStyle}
-      >
-        Loading session...
-      </main>
-    );
-  }
-
   /* 🔥 STREAMER CHECK */
 
   const canStream =
     isStreamer(session?.user);
-
-  console.log(
-    "FULL SESSION:",
-    session
-  );
-
-  console.log(
-    "USER:",
-    session?.user
-  );
-
-  console.log(
-    "ROLES:",
-    (session?.user as any)
-      ?.roles
-  );
-
-  console.log(
-    "CAN STREAM:",
-    canStream
-  );
 
   /* 🔥 ROOM */
 
@@ -100,19 +67,26 @@ export default function LivePage() {
       )}`;
     }, [session, canStream]);
 
+  /* 🔥 DEBUG */
+
+  console.log(
+    "FULL SESSION:",
+    session
+  );
+
+  console.log(
+    "STATUS:",
+    status
+  );
+
+  console.log(
+    "CAN STREAM:",
+    canStream
+  );
+
   console.log(
     "IDENTITY:",
     identity
-  );
-
-  console.log(
-    "ROOM:",
-    roomName
-  );
-
-  console.log(
-    "CAN PUBLISH:",
-    canStream
   );
 
   /* 🔥 LIVEKIT URL */
@@ -131,13 +105,6 @@ export default function LivePage() {
             "🔑 FETCHING TOKEN"
           );
 
-          console.log({
-            identity,
-            roomName,
-            canPublish:
-              canStream,
-          });
-
           const res =
             await fetch(
               `/api/livekit-token?room=${roomName}&identity=${identity}&canPublish=${canStream}`
@@ -148,11 +115,6 @@ export default function LivePage() {
 
           console.log(
             "✅ TOKEN READY"
-          );
-
-          console.log(
-            "TOKEN RESPONSE:",
-            data
           );
 
           setToken(
@@ -168,13 +130,14 @@ export default function LivePage() {
         }
       };
 
-    /* 🔥 IMPORTANT FIX */
-
     if (
-      !identity ||
       status !==
-        "authenticated"
+      "authenticated"
     ) {
+      return;
+    }
+
+    if (!identity) {
       return;
     }
 
@@ -186,7 +149,21 @@ export default function LivePage() {
     status,
   ]);
 
-  /* 🔥 LOADING */
+  /* 🔥 LOADING AUTH */
+
+  if (
+    status === "loading"
+  ) {
+    return (
+      <main
+        style={loadingStyle}
+      >
+        Loading session...
+      </main>
+    );
+  }
+
+  /* 🔥 LOADING TOKEN */
 
   if (loading) {
     return (
@@ -222,53 +199,6 @@ export default function LivePage() {
         padding: "20px",
       }}
     >
-      {/* 🔥 HEADER */}
-
-      <div
-        style={{
-          display: "flex",
-
-          justifyContent:
-            "space-between",
-
-          alignItems: "center",
-
-          gap: "20px",
-
-          marginBottom:
-            "20px",
-
-          maxWidth: "1400px",
-
-          margin:
-            "0 auto 20px",
-        }}
-      >
-        <div>
-          <h1
-            style={{
-              fontSize: "2rem",
-
-              fontWeight: 900,
-            }}
-          >
-            LIVE STREAM
-          </h1>
-
-          <p
-            style={{
-              opacity: 0.7,
-            }}
-          >
-            {canStream
-              ? "Streamer Mode"
-              : "Viewer Mode"}
-          </p>
-        </div>
-      </div>
-
-      {/* 🔥 PLAYER */}
-
       <div
         style={{
           maxWidth: "1400px",
@@ -295,8 +225,6 @@ export default function LivePage() {
 
           connect={true}
 
-          /* 🔥 DO NOT AUTO REQUEST MEDIA */
-
           audio={false}
 
           video={false}
@@ -322,8 +250,6 @@ export default function LivePage() {
 
           data-lk-theme="default"
         >
-          {/* 🔥 STREAMER CONTROLS */}
-
           <div
             style={{
               padding: "20px",
@@ -335,8 +261,6 @@ export default function LivePage() {
               }
             />
           </div>
-
-          {/* 🔥 LIVE PLAYER */}
 
           <LivePlayer />
         </LiveKitRoom>
