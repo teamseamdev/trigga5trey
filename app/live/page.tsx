@@ -380,25 +380,37 @@ export default function LivePage() {
           >
             {/* 🎥 STREAM */}
 
-            <div
-              style={{
-                background:
-                  "#000",
+           <div
+  style={{
+    background:
+      "#000",
 
-                overflow:
-                  "hidden",
+    overflow:
+      "hidden",
 
-                position:
-                  "relative",
+    position:
+      "relative",
 
-                minHeight:
-                  isMobile
-                    ? "260px"
-                    : "100%",
-              }}
-            >
-              <LivePlayer />
-            </div>
+    height:
+      isMobile
+        ? canStream
+          ? "220px"
+          : "340px"
+        : "100%",
+
+    minHeight:
+      isMobile
+        ? canStream
+          ? "220px"
+          : "340px"
+        : "100%",
+
+    transition:
+      "all 0.25s ease",
+  }}
+>
+  <LivePlayer />
+</div>
 
             {/* 💬 CHAT */}
 
