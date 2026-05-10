@@ -2,9 +2,15 @@
 
 import {
   LiveKitRoom,
-  VideoConference,
+  RoomAudioRenderer,
+  useTracks,
+  VideoTrack,
   ControlBar,
 } from "@livekit/components-react";
+
+import {
+  Track,
+} from "livekit-client";
 
 import "@livekit/components-styles";
 
@@ -18,11 +24,77 @@ import { useSession } from "next-auth/react";
 
 import { isStreamer } from "@/lib/isStreamer";
 
+/* 🔥 STREAM VIEW */
+
+function StreamView() {
+  const tracks = useTracks([
+    {
+      source:
+        Track.Source.Camera,
+
+      withPlaceholder: false,
+    },
+  ]);
+
+  const streamerTrack =
+  tracks.find((track: any) =>
+    track.participant?.identity?.startsWith(
+      "streamer-"
+    )
+  );
+
+  if (!streamerTrack) {
+    return (
+      <div
+        style={{
+          height: "700px",
+
+          display: "flex",
+
+          alignItems: "center",
+
+          justifyContent:
+            "center",
+
+          color: "#fff",
+
+          fontSize: "1.2rem",
+
+          background: "#000",
+        }}
+      >
+        Stream is offline.
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        position: "relative",
+
+        width: "100%",
+
+        height: "700px",
+
+        background: "#000",
+      }}
+    >
+      <VideoTrack
+  trackRef={streamerTrack as any}
+/>
+
+      <RoomAudioRenderer />
+    </div>
+  );
+}
+
 export default function LivePage() {
   const { data: session } =
     useSession();
 
   /* 🔥 STREAMER ROLE CHECK */
+
   const canStream =
     isStreamer(session?.user);
 
@@ -40,7 +112,15 @@ export default function LivePage() {
   const room = "main-stream";
 
   /* 🔥 DISCORD USERNAME */
+
   const identity = useMemo(() => {
+    if (
+      canStream &&
+      session?.user?.name
+    ) {
+      return `streamer-${session.user.name}`;
+    }
+
     if (session?.user?.name) {
       return session.user.name;
     }
@@ -48,7 +128,7 @@ export default function LivePage() {
     return `viewer-${Math.floor(
       Math.random() * 99999
     )}`;
-  }, [session]);
+  }, [session, canStream]);
 
   const serverUrl =
     process.env
@@ -80,8 +160,11 @@ export default function LivePage() {
   }, [identity]);
 
   /* 🔥 ENABLE CAMERA + MIC */
+
   const enableMedia =
     async () => {
+      if (!canStream) return;
+
       try {
         await navigator.mediaDevices.getUserMedia(
           {
@@ -126,16 +209,22 @@ export default function LivePage() {
     <main
       style={{
         minHeight: "100vh",
+
         background: "#000",
+
         color: "#fff",
+
         padding: "20px",
       }}
     >
       {/* 🔥 HEADER */}
+
       <div
         style={{
           maxWidth: "1400px",
-          margin: "0 auto 20px",
+
+          margin:
+            "0 auto 20px",
 
           display: "flex",
 
@@ -153,7 +242,9 @@ export default function LivePage() {
           <h1
             style={{
               fontSize: "2rem",
+
               fontWeight: 900,
+
               marginBottom: "6px",
             }}
           >
@@ -172,9 +263,12 @@ export default function LivePage() {
         </div>
 
         {/* 🔥 STREAMERS ONLY */}
+
         {canStream && (
           <button
-            onClick={enableMedia}
+            onClick={
+              enableMedia
+            }
             style={{
               padding:
                 "12px 22px",
@@ -206,14 +300,17 @@ export default function LivePage() {
       </div>
 
       {/* 🔥 PLAYER */}
+
       <div
         style={{
           width: "100%",
+
           maxWidth: "1400px",
 
           margin: "0 auto",
 
-          borderRadius: "24px",
+          borderRadius:
+            "24px",
 
           overflow: "hidden",
 
@@ -228,24 +325,27 @@ export default function LivePage() {
       >
         {token && (
           <LiveKitRoom
-            serverUrl={serverUrl}
+            serverUrl={
+              serverUrl
+            }
+
             token={token}
+
             connect={true}
 
-            /* 🔥 REMOVE PREJOIN */
-           
-            /* 🔥 STREAM SETTINGS */
             options={{
               videoCaptureDefaults:
                 {
-                  resolution: {
-                    width: 1280,
-                    height: 720,
-                  },
+                  resolution:
+                    {
+                      width: 1280,
+                      height: 720,
+                    },
                 },
             }}
 
-            /* 🔥 ONLY STREAMERS GET MIC/CAM */
+            /* 🔥 ONLY STREAMERS CAN PUBLISH */
+
             audio={
               canStream &&
               permissionsGranted
@@ -259,9 +359,10 @@ export default function LivePage() {
             data-lk-theme="default"
           >
             <>
-              <VideoConference />
+              {/* 🔥 STREAM ONLY */}
+              <StreamView />
 
-              {/* 🔥 STREAMERS ONLY CONTROLS */}
+              {/* 🔥 ONLY STREAMERS SEE CONTROLS */}
               {canStream &&
                 permissionsGranted && (
                   <ControlBar />
