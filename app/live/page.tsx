@@ -6,6 +6,7 @@ import {
   useTracks,
   VideoTrack,
   ControlBar,
+  useLocalParticipant,
 } from "@livekit/components-react";
 
 import {
@@ -24,6 +25,48 @@ import { useSession } from "next-auth/react";
 
 import { isStreamer } from "@/lib/isStreamer";
 
+/* 🔥 STREAM PUBLISHER */
+
+function StreamPublisher({
+  enabled,
+}: {
+  enabled: boolean;
+}) {
+  const {
+    localParticipant,
+  } = useLocalParticipant();
+
+  useEffect(() => {
+    const start =
+      async () => {
+        if (!enabled) return;
+
+        try {
+          await localParticipant.setCameraEnabled(
+            true
+          );
+
+          await localParticipant.setMicrophoneEnabled(
+            true
+          );
+
+          console.log(
+            "🔥 Publishing tracks"
+          );
+        } catch (err) {
+          console.error(
+            "Publish failed:",
+            err
+          );
+        }
+      };
+
+    start();
+  }, [enabled, localParticipant]);
+
+  return null;
+}
+
 /* 🔥 STREAM VIEW */
 
 function StreamView() {
@@ -37,11 +80,11 @@ function StreamView() {
   ]);
 
   const streamerTrack =
-  tracks.find((track: any) =>
-    track.participant?.identity?.startsWith(
-      "streamer-"
-    )
-  );
+    tracks.find((track: any) =>
+      track.participant?.identity?.startsWith(
+        "streamer-"
+      )
+    );
 
   if (!streamerTrack) {
     return (
@@ -81,8 +124,10 @@ function StreamView() {
       }}
     >
       <VideoTrack
-  trackRef={streamerTrack as any}
-/>
+        trackRef={
+          streamerTrack as any
+        }
+      />
 
       <RoomAudioRenderer />
     </div>
@@ -359,6 +404,14 @@ export default function LivePage() {
             data-lk-theme="default"
           >
             <>
+              {/* 🔥 PUBLISH TRACKS */}
+              <StreamPublisher
+                enabled={
+                  canStream &&
+                  permissionsGranted
+                }
+              />
+
               {/* 🔥 STREAM ONLY */}
               <StreamView />
 
