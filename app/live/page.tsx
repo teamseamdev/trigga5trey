@@ -3,6 +3,7 @@
 import {
   LiveKitRoom,
   VideoConference,
+  ControlBar,
 } from "@livekit/components-react";
 
 import "@livekit/components-styles";
@@ -231,6 +232,19 @@ export default function LivePage() {
             token={token}
             connect={true}
 
+            /* 🔥 REMOVE PREJOIN */
+           
+            /* 🔥 STREAM SETTINGS */
+            options={{
+              videoCaptureDefaults:
+                {
+                  resolution: {
+                    width: 1280,
+                    height: 720,
+                  },
+                },
+            }}
+
             /* 🔥 ONLY STREAMERS GET MIC/CAM */
             audio={
               canStream &&
@@ -244,7 +258,15 @@ export default function LivePage() {
 
             data-lk-theme="default"
           >
-            <VideoConference />
+            <>
+              <VideoConference />
+
+              {/* 🔥 STREAMERS ONLY CONTROLS */}
+              {canStream &&
+                permissionsGranted && (
+                  <ControlBar />
+                )}
+            </>
           </LiveKitRoom>
         )}
       </div>
