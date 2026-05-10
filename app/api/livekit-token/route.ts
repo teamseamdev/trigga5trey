@@ -68,10 +68,10 @@ export async function GET(
 
       room,
 
+      canSubscribe: true,
+
       canPublish:
         canPublish,
-
-      canSubscribe: true,
 
       canPublishData:
         canPublish,
@@ -79,6 +79,10 @@ export async function GET(
 
     const jwt =
       await token.toJwt();
+
+    console.log(
+      "✅ TOKEN CREATED"
+    );
 
     return NextResponse.json({
       token: jwt,

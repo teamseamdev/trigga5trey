@@ -12,7 +12,9 @@ import {
 
 import "@livekit/components-styles";
 
-import { useSession } from "next-auth/react";
+import {
+  useSession,
+} from "next-auth/react";
 
 import { isStreamer } from "@/lib/isStreamer";
 
@@ -21,14 +23,28 @@ import LivePlayer from "@/components/live/LivePlayer";
 import StreamerControls from "@/components/live/StreamerControls";
 
 export default function LivePage() {
-  const { data: session } =
-    useSession();
+  const {
+    data: session,
+    status,
+  } = useSession();
 
   const [token, setToken] =
     useState("");
 
   const [loading, setLoading] =
     useState(true);
+
+  /* 🔥 WAIT FOR AUTH */
+
+  if (status === "loading") {
+    return (
+      <main
+        style={loadingStyle}
+      >
+        Loading session...
+      </main>
+    );
+  }
 
   /* 🔥 STREAMER CHECK */
 
@@ -47,7 +63,8 @@ export default function LivePage() {
 
   console.log(
     "ROLES:",
-    (session?.user as any)?.roles
+    (session?.user as any)
+      ?.roles
   );
 
   console.log(
@@ -62,22 +79,26 @@ export default function LivePage() {
 
   /* 🔥 IDENTITY */
 
-  const identity = useMemo(() => {
-    if (
-      canStream &&
-      session?.user?.name
-    ) {
-      return `streamer-${session.user.name}`;
-    }
+  const identity =
+    useMemo(() => {
+      if (
+        canStream &&
+        session?.user?.name
+      ) {
+        return `streamer-${session.user.name}`;
+      }
 
-    if (session?.user?.name) {
-      return session.user.name;
-    }
+      if (
+        session?.user?.name
+      ) {
+        return session.user.name;
+      }
 
-    return `viewer-${Math.floor(
-      Math.random() * 999999
-    )}`;
-  }, [session, canStream]);
+      return `viewer-${Math.floor(
+        Math.random() *
+          999999
+      )}`;
+    }, [session, canStream]);
 
   console.log(
     "IDENTITY:",
@@ -110,9 +131,17 @@ export default function LivePage() {
             "🔑 FETCHING TOKEN"
           );
 
-          const res = await fetch(
-            `/api/livekit-token?room=${roomName}&identity=${identity}&canPublish=${canStream}`
-          );
+          console.log({
+            identity,
+            roomName,
+            canPublish:
+              canStream,
+          });
+
+          const res =
+            await fetch(
+              `/api/livekit-token?room=${roomName}&identity=${identity}&canPublish=${canStream}`
+            );
 
           const data =
             await res.json();
@@ -126,7 +155,9 @@ export default function LivePage() {
             data
           );
 
-          setToken(data.token);
+          setToken(
+            data.token
+          );
         } catch (err) {
           console.error(
             "❌ TOKEN ERROR",
@@ -137,13 +168,22 @@ export default function LivePage() {
         }
       };
 
-    if (!identity) return;
+    /* 🔥 IMPORTANT FIX */
+
+    if (
+      !identity ||
+      status !==
+        "authenticated"
+    ) {
+      return;
+    }
 
     fetchToken();
   }, [
     identity,
     roomName,
     canStream,
+    status,
   ]);
 
   /* 🔥 LOADING */
@@ -195,7 +235,8 @@ export default function LivePage() {
 
           gap: "20px",
 
-          marginBottom: "20px",
+          marginBottom:
+            "20px",
 
           maxWidth: "1400px",
 
@@ -254,11 +295,15 @@ export default function LivePage() {
 
           connect={true}
 
+          /* 🔥 DO NOT AUTO REQUEST MEDIA */
+
           audio={false}
-video={false}
+
+          video={false}
 
           options={{
-            adaptiveStream: true,
+            adaptiveStream:
+              true,
 
             dynacast: true,
           }}
@@ -277,7 +322,7 @@ video={false}
 
           data-lk-theme="default"
         >
-          {/* 🔥 STREAMER BUTTON */}
+          {/* 🔥 STREAMER CONTROLS */}
 
           <div
             style={{
@@ -307,7 +352,8 @@ const loadingStyle = {
 
   alignItems: "center",
 
-  justifyContent: "center",
+  justifyContent:
+    "center",
 
   background: "#000",
 
