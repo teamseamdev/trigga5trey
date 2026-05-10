@@ -1,193 +1,28 @@
 "use client";
 
 import {
-  LiveKitRoom,
-  RoomAudioRenderer,
-  useTracks,
-  VideoTrack,
-  ControlBar,
-  useLocalParticipant,
-} from "@livekit/components-react";
-
-import {
-  Track,
-} from "livekit-client";
-
-import "@livekit/components-styles";
-
-import {
   useEffect,
   useMemo,
   useState,
 } from "react";
 
+import {
+  LiveKitRoom,
+} from "@livekit/components-react";
+
+import "@livekit/components-styles";
+
 import { useSession } from "next-auth/react";
 
 import { isStreamer } from "@/lib/isStreamer";
 
-/* 🔥 STREAM PUBLISHER */
+import LivePlayer from "@/components/live/LivePlayer";
 
-function StreamPublisher({
-  enabled,
-}: {
-  enabled: boolean;
-}) {
-  const {
-    localParticipant,
-  } = useLocalParticipant();
-
-  const [started, setStarted] =
-    useState(false);
-
-  useEffect(() => {
-    const start =
-      async () => {
-        if (!enabled) return;
-
-        if (started) return;
-
-        try {
-          console.log(
-            "🔥 STARTING STREAM"
-          );
-
-          const stream =
-            await navigator.mediaDevices.getUserMedia(
-              {
-                video: true,
-                audio: true,
-              }
-            );
-
-          const videoTrack =
-            stream.getVideoTracks()[0];
-
-          const audioTrack =
-            stream.getAudioTracks()[0];
-
-          if (videoTrack) {
-            await localParticipant.publishTrack(
-              videoTrack
-            );
-
-            console.log(
-              "✅ VIDEO TRACK PUBLISHED"
-            );
-          }
-
-          if (audioTrack) {
-            await localParticipant.publishTrack(
-              audioTrack
-            );
-
-            console.log(
-              "✅ AUDIO TRACK PUBLISHED"
-            );
-          }
-
-          setStarted(true);
-
-          console.log(
-            "🚀 STREAM LIVE"
-          );
-        } catch (err) {
-          console.error(
-            "❌ STREAM ERROR",
-            err
-          );
-        }
-      };
-
-    start();
-  }, [
-    enabled,
-    localParticipant,
-    started,
-  ]);
-
-  return null;
-}
-
-/* 🔥 STREAM VIEW */
-
-function StreamView() {
-  const tracks = useTracks([
-    {
-      source:
-        Track.Source.Camera,
-
-      withPlaceholder: false,
-    },
-  ]);
-
-  console.log(
-    "🎥 TRACKS:",
-    tracks
-  );
-
-  const streamerTrack =
-    tracks.find((track: any) =>
-      track.participant?.identity?.startsWith(
-        "streamer-"
-      )
-    );
-
-  if (!streamerTrack) {
-    return (
-      <div
-        style={{
-          height: "700px",
-
-          display: "flex",
-
-          alignItems: "center",
-
-          justifyContent:
-            "center",
-
-          color: "#fff",
-
-          fontSize: "1.2rem",
-
-          background: "#000",
-        }}
-      >
-        Stream is offline.
-      </div>
-    );
-  }
-
-  return (
-    <div
-      style={{
-        position: "relative",
-
-        width: "100%",
-
-        height: "700px",
-
-        background: "#000",
-      }}
-    >
-      <VideoTrack
-        trackRef={
-          streamerTrack as any
-        }
-      />
-
-      <RoomAudioRenderer />
-    </div>
-  );
-}
+import StreamerControls from "@/components/live/StreamerControls";
 
 export default function LivePage() {
   const { data: session } =
     useSession();
-
-  /* 🔥 STREAMER ROLE CHECK */
-
-  const canStream =
-    isStreamer(session?.user);
 
   const [token, setToken] =
     useState("");
@@ -195,14 +30,11 @@ export default function LivePage() {
   const [loading, setLoading] =
     useState(true);
 
-  const [
-    permissionsGranted,
-    setPermissionsGranted,
-  ] = useState(false);
+  const canStream =
+    isStreamer(session?.user);
 
-  const room = "main-stream";
-
-  /* 🔥 DISCORD USERNAME */
+  const roomName =
+    "main-stream";
 
   const identity = useMemo(() => {
     if (
@@ -217,7 +49,7 @@ export default function LivePage() {
     }
 
     return `viewer-${Math.floor(
-      Math.random() * 99999
+      Math.random() * 999999
     )}`;
   }, [session, canStream]);
 
@@ -234,27 +66,27 @@ export default function LivePage() {
           );
 
           console.log({
-            room,
             identity,
+            roomName,
             canPublish:
               canStream,
           });
 
           const res = await fetch(
-            `/api/livekit-token?room=${room}&identity=${identity}&canPublish=${canStream}`
+            `/api/livekit-token?room=${roomName}&identity=${identity}&canPublish=${canStream}`
           );
 
           const data =
             await res.json();
 
           console.log(
-            "✅ TOKEN RECEIVED"
+            "✅ TOKEN READY"
           );
 
           setToken(data.token);
         } catch (err) {
           console.error(
-            "Token fetch failed:",
+            "❌ TOKEN ERROR",
             err
           );
         } finally {
@@ -263,37 +95,11 @@ export default function LivePage() {
       };
 
     fetchToken();
-  }, [identity, canStream]);
-
-  /* 🔥 ENABLE CAMERA + MIC */
-
-  const enableMedia =
-    async () => {
-      if (!canStream) return;
-
-      try {
-        await navigator.mediaDevices.getUserMedia(
-          {
-            video: true,
-            audio: true,
-          }
-        );
-
-        console.log(
-          "🎤 CAMERA/MIC GRANTED"
-        );
-
-        setPermissionsGranted(
-          true
-        );
-      } catch (err) {
-        console.error(err);
-
-        alert(
-          "Camera or microphone access denied."
-        );
-      }
-    };
+  }, [
+    identity,
+    roomName,
+    canStream,
+  ]);
 
   if (loading) {
     return (
@@ -327,15 +133,10 @@ export default function LivePage() {
         padding: "20px",
       }}
     >
-      {/* 🔥 HEADER */}
+      {/* HEADER */}
 
       <div
         style={{
-          maxWidth: "1400px",
-
-          margin:
-            "0 auto 20px",
-
           display: "flex",
 
           justifyContent:
@@ -343,9 +144,14 @@ export default function LivePage() {
 
           alignItems: "center",
 
-          flexWrap: "wrap",
+          gap: "20px",
 
-          gap: "12px",
+          marginBottom: "20px",
+
+          maxWidth: "1400px",
+
+          margin:
+            "0 auto 20px",
         }}
       >
         <div>
@@ -354,8 +160,6 @@ export default function LivePage() {
               fontSize: "2rem",
 
               fontWeight: 900,
-
-              marginBottom: "6px",
             }}
           >
             LIVE STREAM
@@ -367,147 +171,101 @@ export default function LivePage() {
             }}
           >
             {canStream
-              ? "Streamer mode enabled"
-              : "Viewer mode"}
+              ? "Streamer Mode"
+              : "Viewer Mode"}
           </p>
         </div>
-
-        {/* 🔥 STREAMERS ONLY */}
-
-        {canStream && (
-          <button
-            onClick={
-              enableMedia
-            }
-            style={{
-              padding:
-                "12px 22px",
-
-              borderRadius:
-                "14px",
-
-              border: "none",
-
-              background:
-                permissionsGranted
-                  ? "linear-gradient(135deg, #18c964 0%, #43e97b 100%)"
-                  : "linear-gradient(135deg, #ff2d2d 0%, #ff5a5a 100%)",
-
-              color: "#fff",
-
-              fontWeight: 800,
-
-              cursor: "pointer",
-
-              fontSize: "1rem",
-            }}
-          >
-            {permissionsGranted
-              ? "🟢 LIVE ENABLED"
-              : "🔴 GO LIVE"}
-          </button>
-        )}
       </div>
 
-      {/* 🔥 PLAYER */}
+      {/* LIVEKIT */}
 
       <div
         style={{
-          width: "100%",
-
           maxWidth: "1400px",
 
           margin: "0 auto",
 
+          overflow: "hidden",
+
           borderRadius:
             "24px",
-
-          overflow: "hidden",
 
           border:
             "1px solid rgba(255,255,255,0.08)",
 
-          boxShadow:
-            "0 20px 60px rgba(0,0,0,0.45)",
-
-          minHeight: "700px",
+          background: "#000",
         }}
       >
-        {token && (
-          <LiveKitRoom
-            serverUrl={
-              serverUrl
-            }
+        <LiveKitRoom
+          serverUrl={
+            serverUrl
+          }
 
-            token={token}
+          token={token}
 
-            connect={true}
+          connect={true}
 
-            options={{
-              adaptiveStream: true,
+          audio={
+            canStream
+          }
 
-              dynacast: true,
+          video={
+            canStream
+          }
 
-              videoCaptureDefaults:
-                {
-                  resolution:
-                    {
-                      width: 1280,
-                      height: 720,
-                    },
-                },
+          options={{
+            adaptiveStream: true,
+
+            dynacast: true,
+          }}
+
+          onConnected={() => {
+            console.log(
+              "✅ CONNECTED TO LIVEKIT"
+            );
+          }}
+
+          onDisconnected={() => {
+            console.log(
+              "❌ DISCONNECTED"
+            );
+          }}
+
+          data-lk-theme="default"
+        >
+          {/* STREAMER BUTTONS */}
+
+          <div
+            style={{
+              padding: "20px",
             }}
-
-            audio={
-              canStream &&
-              permissionsGranted
-            }
-
-            video={
-              canStream &&
-              permissionsGranted
-            }
-
-            data-lk-theme="default"
           >
-            <>
-              {/* 🔥 PUBLISH TRACKS */}
+            <StreamerControls
+              canStream={
+                canStream
+              }
+            />
+          </div>
 
-              <StreamPublisher
-                enabled={
-                  canStream &&
-                  permissionsGranted
-                }
-              />
+          {/* LIVE PLAYER */}
 
-              {/* 🔥 STREAM VIEW */}
-
-              <StreamView />
-
-              {/* 🔥 ONLY STREAMERS SEE CONTROLS */}
-
-              {canStream &&
-                permissionsGranted && (
-                  <ControlBar />
-                )}
-            </>
-          </LiveKitRoom>
-        )}
+          <LivePlayer />
+        </LiveKitRoom>
       </div>
     </main>
   );
 }
 
 const loadingStyle = {
-  height: "100vh",
-
-  background: "#000",
+  minHeight: "100vh",
 
   display: "flex",
 
   alignItems: "center",
 
   justifyContent: "center",
+
+  background: "#000",
 
   color: "#fff",
 };
