@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useState,
 } from "react";
 
@@ -23,17 +24,57 @@ export default function StreamerControls({
     useState(false);
 
   const [micEnabled, setMicEnabled] =
-    useState(true);
+    useState(false);
 
   const [
     cameraEnabled,
     setCameraEnabled,
+  ] = useState(false);
+
+  const [
+    usingFrontCamera,
+    setUsingFrontCamera,
   ] = useState(true);
 
   const [
-    frontCamera,
-    setFrontCamera,
-  ] = useState(true);
+    participantCount,
+    setParticipantCount,
+  ] = useState(1);
+
+  /* 🔥 WATCH VIEWER COUNT */
+
+  useEffect(() => {
+    const updateCount =
+      () => {
+        setParticipantCount(
+          room.numParticipants
+        );
+      };
+
+    updateCount();
+
+    room.on(
+      "participantConnected",
+      updateCount
+    );
+
+    room.on(
+      "participantDisconnected",
+      updateCount
+    );
+
+    return () => {
+      room.off(
+        "participantConnected",
+        updateCount
+      );
+
+      room.off(
+        "participantDisconnected",
+        updateCount
+      );
+    };
+  }, [room]);
 
   /* 🔥 START STREAM */
 
@@ -50,54 +91,56 @@ export default function StreamerControls({
       try {
         setLoading(true);
 
-        console.log(
-          "🔥 STARTING STREAM"
-        );
-
-        console.log(
-          "🔥 ROOM:",
-          room
-        );
-
-        console.log(
-          "🔥 IDENTITY:",
-          room.localParticipant
-            .identity
-        );
-
         const devices =
           await navigator.mediaDevices.enumerateDevices();
 
-        console.log(
-          "🎤 DEVICES:",
-          devices
-        );
+        const hasCamera =
+          devices.some(
+            (d) =>
+              d.kind ===
+              "videoinput"
+          );
 
-        /* 🎤 ENABLE MIC */
+        const hasMic =
+          devices.some(
+            (d) =>
+              d.kind ===
+              "audioinput"
+          );
 
-        await room.localParticipant.setMicrophoneEnabled(
-          true
-        );
+        /* 🎤 MIC */
 
-        console.log(
-          "✅ MIC ENABLED"
-        );
+        if (hasMic) {
+          await room.localParticipant.setMicrophoneEnabled(
+            true
+          );
 
-        /* 📷 ENABLE CAMERA */
+          setMicEnabled(
+            true
+          );
 
-        await room.localParticipant.setCameraEnabled(
-          true
-        );
+          console.log(
+            "✅ MIC ENABLED"
+          );
+        }
 
-        console.log(
-          "✅ CAMERA ENABLED"
-        );
+        /* 📸 CAMERA */
+
+        if (hasCamera) {
+          await room.localParticipant.setCameraEnabled(
+            true
+          );
+
+          setCameraEnabled(
+            true
+          );
+
+          console.log(
+            "✅ CAMERA ENABLED"
+          );
+        }
 
         setLive(true);
-
-        setMicEnabled(true);
-
-        setCameraEnabled(true);
 
         console.log(
           "🚀 STREAM LIVE"
@@ -106,11 +149,6 @@ export default function StreamerControls({
         console.error(
           "❌ STREAM FAILED",
           err
-        );
-
-        console.log(
-          "ERROR:",
-          err?.message
         );
 
         alert(
@@ -135,17 +173,23 @@ export default function StreamerControls({
           false
         );
 
+        setMicEnabled(
+          false
+        );
+
+        setCameraEnabled(
+          false
+        );
+
         setLive(false);
-
-        setMicEnabled(false);
-
-        setCameraEnabled(false);
 
         console.log(
           "🛑 STREAM ENDED"
         );
       } catch (err) {
-        console.error(err);
+        console.error(
+          err
+        );
       }
     };
 
@@ -153,50 +197,32 @@ export default function StreamerControls({
 
   const toggleMic =
     async () => {
-      try {
-        const next =
-          !micEnabled;
+      const newState =
+        !micEnabled;
 
-        await room.localParticipant.setMicrophoneEnabled(
-          next
-        );
+      await room.localParticipant.setMicrophoneEnabled(
+        newState
+      );
 
-        setMicEnabled(next);
-
-        console.log(
-          next
-            ? "🎤 MIC ON"
-            : "🔇 MIC OFF"
-        );
-      } catch (err) {
-        console.error(err);
-      }
+      setMicEnabled(
+        newState
+      );
     };
 
   /* 🔥 TOGGLE CAMERA */
 
   const toggleCamera =
     async () => {
-      try {
-        const next =
-          !cameraEnabled;
+      const newState =
+        !cameraEnabled;
 
-        await room.localParticipant.setCameraEnabled(
-          next
-        );
+      await room.localParticipant.setCameraEnabled(
+        newState
+      );
 
-        setCameraEnabled(
-          next
-        );
-
-        console.log(
-          next
-            ? "📷 CAMERA ON"
-            : "📷 CAMERA OFF"
-        );
-      } catch (err) {
-        console.error(err);
-      }
+      setCameraEnabled(
+        newState
+      );
     };
 
   /* 🔥 FLIP CAMERA */
@@ -214,51 +240,43 @@ export default function StreamerControls({
               "videoinput"
           );
 
-        console.log(
-          "📷 VIDEO DEVICES:",
-          videoDevices
-        );
-
         if (
-          videoDevices.length < 2
+          videoDevices.length <
+          2
         ) {
           alert(
-            "No secondary camera found"
+            "No second camera found"
           );
 
           return;
         }
 
-        const nextFront =
-          !frontCamera;
-
         const targetDevice =
-          nextFront
-            ? videoDevices[0]
-            : videoDevices[1];
+          usingFrontCamera
+            ? videoDevices[1]
+            : videoDevices[0];
+
+        await room.localParticipant.setCameraEnabled(
+          false
+        );
+
+        await room.localParticipant.setCameraEnabled(
+          true,
+          {
+            deviceId:
+              targetDevice.deviceId,
+          }
+        );
+
+        setUsingFrontCamera(
+          !usingFrontCamera
+        );
 
         console.log(
-          "🔄 SWITCHING CAMERA:",
-          targetDevice
-        );
-
-        await room.switchActiveDevice(
-          "videoinput",
-          targetDevice.deviceId
-        );
-
-        setFrontCamera(
-          nextFront
-        );
-
-        console.log(
-          nextFront
-            ? "🤳 FRONT CAMERA"
-            : "📷 REAR CAMERA"
+          "🔄 CAMERA FLIPPED"
         );
       } catch (err) {
         console.error(
-          "❌ CAMERA FLIP FAILED",
           err
         );
       }
@@ -273,28 +291,217 @@ export default function StreamerControls({
       style={{
         display: "flex",
 
-        flexWrap: "wrap",
+        flexDirection:
+          "column",
 
         gap: "12px",
-
-        alignItems: "center",
       }}
     >
-      {/* 🔴 GO LIVE */}
+      {/* 🔥 VIEWER COUNT */}
+
+      <div
+        style={{
+          fontWeight: 700,
+
+          opacity: 0.8,
+
+          fontSize: "0.95rem",
+        }}
+      >
+        👁{" "}
+        {participantCount}{" "}
+        watching
+      </div>
+
+      {/* 🔥 BUTTON ROW */}
+
+      <div
+        style={{
+          display: "grid",
+
+          gridTemplateColumns:
+            "repeat(4, 1fr)",
+
+          gap: "10px",
+
+          width: "100%",
+        }}
+      >
+        {/* 🔴 END */}
+
+        <button
+          onClick={
+            endStream
+          }
+          disabled={!live}
+          style={{
+            padding:
+              "12px 10px",
+
+            borderRadius:
+              "12px",
+
+            border: "none",
+
+            background:
+              "#3a3a3a",
+
+            color: "#fff",
+
+            fontWeight: 800,
+
+            fontSize:
+              "0.95rem",
+
+            cursor:
+              "pointer",
+          }}
+        >
+          🛑 END
+        </button>
+
+        {/* 🎤 MIC */}
+
+        <button
+          onClick={
+            toggleMic
+          }
+          disabled={!live}
+          style={{
+            padding:
+              "12px 10px",
+
+            borderRadius:
+              "12px",
+
+            border: "none",
+
+            background:
+              micEnabled
+                ? "#18c964"
+                : "#ff2d2d",
+
+            color: "#fff",
+
+            fontWeight: 800,
+
+            fontSize:
+              "0.95rem",
+
+            cursor:
+              "pointer",
+          }}
+        >
+          🎤{" "}
+          {micEnabled
+            ? "ON"
+            : "OFF"}
+        </button>
+
+        {/* 📸 CAMERA */}
+
+        <button
+          onClick={
+            toggleCamera
+          }
+          disabled={!live}
+          style={{
+            padding:
+              "12px 10px",
+
+            borderRadius:
+              "12px",
+
+            border: "none",
+
+            background:
+              cameraEnabled
+                ? "#18c964"
+                : "#ff2d2d",
+
+            color: "#fff",
+
+            fontWeight: 800,
+
+            fontSize:
+              "0.95rem",
+
+            cursor:
+              "pointer",
+          }}
+        >
+          📸{" "}
+          {cameraEnabled
+            ? "ON"
+            : "OFF"}
+        </button>
+
+        {/* 🔄 FLIP */}
+
+        <button
+          onClick={
+            flipCamera
+          }
+          disabled={
+            !live ||
+            !cameraEnabled
+          }
+          style={{
+            padding:
+              "12px 10px",
+
+            borderRadius:
+              "12px",
+
+            border: "none",
+
+            background:
+              "#2d6cff",
+
+            color: "#fff",
+
+            fontWeight: 800,
+
+            fontSize:
+              "0.95rem",
+
+            cursor:
+              "pointer",
+          }}
+        >
+          🔄 FLIP
+        </button>
+      </div>
+
+      {/* 🔥 GO LIVE */}
 
       {!live && (
         <button
           onClick={
             startStream
           }
-          disabled={
-            loading
-          }
+          disabled={loading}
           style={{
-            ...buttonStyle,
+            padding:
+              "14px",
+
+            borderRadius:
+              "14px",
+
+            border: "none",
 
             background:
               "#ff2d2d",
+
+            color: "#fff",
+
+            fontWeight: 900,
+
+            fontSize:
+              "1rem",
+
+            cursor:
+              "pointer",
           }}
         >
           {loading
@@ -302,100 +509,6 @@ export default function StreamerControls({
             : "🔴 GO LIVE"}
         </button>
       )}
-
-      {/* 🛑 END */}
-
-      {live && (
-        <>
-          <button
-            onClick={
-              endStream
-            }
-            style={{
-              ...buttonStyle,
-
-              background:
-                "#444",
-            }}
-          >
-            🛑 END
-          </button>
-
-          {/* 🎤 MIC */}
-
-          <button
-            onClick={
-              toggleMic
-            }
-            style={{
-              ...buttonStyle,
-
-              background:
-                micEnabled
-                  ? "#18c964"
-                  : "#ff2d2d",
-            }}
-          >
-            {micEnabled
-              ? "🎤 MIC ON"
-              : "🔇 MIC OFF"}
-          </button>
-
-          {/* 📷 CAMERA */}
-
-          <button
-            onClick={
-              toggleCamera
-            }
-            style={{
-              ...buttonStyle,
-
-              background:
-                cameraEnabled
-                  ? "#18c964"
-                  : "#ff2d2d",
-            }}
-          >
-            {cameraEnabled
-              ? "📷 CAMERA ON"
-              : "📷 CAMERA OFF"}
-          </button>
-
-          {/* 🔄 FLIP CAMERA */}
-
-          <button
-            onClick={
-              flipCamera
-            }
-            style={{
-              ...buttonStyle,
-
-              background:
-                "#0070f3",
-            }}
-          >
-            🔄 FLIP
-          </button>
-        </>
-      )}
     </div>
   );
 }
-
-/* 🔥 BUTTON STYLE */
-
-const buttonStyle = {
-  padding: "14px 22px",
-
-  borderRadius: "14px",
-
-  border: "none",
-
-  color: "#fff",
-
-  fontWeight: 800,
-
-  fontSize: "1rem",
-
-  cursor: "pointer",
-} as const;
