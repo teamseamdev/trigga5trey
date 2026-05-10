@@ -36,6 +36,35 @@ export default function LivePage() {
   const [loading, setLoading] =
     useState(true);
 
+  const [isMobile, setIsMobile] =
+    useState(false);
+
+  /* 🔥 MOBILE CHECK */
+
+  useEffect(() => {
+    const handleResize =
+      () => {
+        setIsMobile(
+          window.innerWidth <
+            900
+        );
+      };
+
+    handleResize();
+
+    window.addEventListener(
+      "resize",
+      handleResize
+    );
+
+    return () => {
+      window.removeEventListener(
+        "resize",
+        handleResize
+      );
+    };
+  }, []);
+
   /* 🔥 STREAMER CHECK */
 
   const canStream =
@@ -198,24 +227,34 @@ export default function LivePage() {
 
         color: "#fff",
 
-        padding: "20px",
+        padding:
+          isMobile
+            ? "0px"
+            : "20px",
       }}
     >
       <div
         style={{
-          maxWidth: "1600px",
+          maxWidth: "1700px",
 
           margin: "0 auto",
 
           overflow: "hidden",
 
           borderRadius:
-            "24px",
+            isMobile
+              ? "0px"
+              : "24px",
 
           border:
-            "1px solid rgba(255,255,255,0.08)",
+            isMobile
+              ? "none"
+              : "1px solid rgba(255,255,255,0.08)",
 
           background: "#000",
+
+          minHeight:
+            "100vh",
         }}
       >
         <LiveKitRoom
@@ -256,12 +295,65 @@ export default function LivePage() {
 
           <div
             style={{
-              padding: "20px",
+              padding:
+                isMobile
+                  ? "14px"
+                  : "20px",
 
               borderBottom:
                 "1px solid rgba(255,255,255,0.08)",
+
+              display: "flex",
+
+              justifyContent:
+                "space-between",
+
+              alignItems:
+                "center",
+
+              flexWrap: "wrap",
+
+              gap: "12px",
+
+              background:
+                "#0a0a0a",
             }}
           >
+            <div>
+              <h1
+                style={{
+                  margin: 0,
+
+                  fontSize:
+                    isMobile
+                      ? "1.3rem"
+                      : "2rem",
+
+                  fontWeight: 900,
+                }}
+              >
+                🔴 LIVE STREAM
+              </h1>
+
+              <p
+                style={{
+                  marginTop:
+                    "6px",
+
+                  opacity: 0.7,
+
+                  fontSize:
+                    isMobile
+                      ? "0.9rem"
+                      : "1rem",
+                }}
+              >
+                {canStream
+                  ? "Streamer Mode"
+                  : "Viewer Mode"}
+              </p>
+            </div>
+
             <StreamerControls
               canStream={
                 canStream
@@ -276,10 +368,14 @@ export default function LivePage() {
               display: "grid",
 
               gridTemplateColumns:
-                "1fr 360px",
+                isMobile
+                  ? "1fr"
+                  : "1fr 360px",
 
               minHeight:
-                "75vh",
+                isMobile
+                  ? "auto"
+                  : "calc(100vh - 120px)",
             }}
           >
             {/* 🎥 STREAM */}
@@ -291,6 +387,14 @@ export default function LivePage() {
 
                 overflow:
                   "hidden",
+
+                position:
+                  "relative",
+
+                minHeight:
+                  isMobile
+                    ? "260px"
+                    : "100%",
               }}
             >
               <LivePlayer />
@@ -303,8 +407,23 @@ export default function LivePage() {
                 background:
                   "#111",
 
-                minHeight:
-                  "75vh",
+                borderLeft:
+                  !isMobile
+                    ? "1px solid rgba(255,255,255,0.08)"
+                    : "none",
+
+                borderTop:
+                  isMobile
+                    ? "1px solid rgba(255,255,255,0.08)"
+                    : "none",
+
+                height:
+                  isMobile
+                    ? "500px"
+                    : "calc(100vh - 120px)",
+
+                overflow:
+                  "hidden",
               }}
             >
               <LiveChat />
@@ -329,4 +448,6 @@ const loadingStyle = {
   background: "#000",
 
   color: "#fff",
+
+  fontSize: "1.1rem",
 };

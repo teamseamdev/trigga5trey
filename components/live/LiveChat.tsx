@@ -46,6 +46,11 @@ export default function LiveChat() {
       null
     );
 
+  const isMobile =
+    typeof window !==
+      "undefined" &&
+    window.innerWidth < 900;
+
   /* 🔥 AUTO SCROLL */
 
   useEffect(() => {
@@ -121,6 +126,8 @@ export default function LiveChat() {
           user:
             session?.user
               ?.name ||
+            room.localParticipant
+              .identity ||
             "Anonymous",
 
           message:
@@ -136,13 +143,6 @@ export default function LiveChat() {
               messageData
             )
           )
-        );
-
-        setMessages(
-          (prev) => [
-            ...prev,
-            messageData,
-          ]
         );
 
         setInput("");
@@ -170,7 +170,14 @@ export default function LiveChat() {
           "#0f0f0f",
 
         borderLeft:
-          "1px solid rgba(255,255,255,0.08)",
+          isMobile
+            ? "none"
+            : "1px solid rgba(255,255,255,0.08)",
+
+        borderTop:
+          isMobile
+            ? "1px solid rgba(255,255,255,0.08)"
+            : "none",
       }}
     >
       {/* 🔥 HEADER */}
@@ -185,6 +192,16 @@ export default function LiveChat() {
           fontWeight: 800,
 
           fontSize: "1rem",
+
+          background:
+            "#111",
+
+          position:
+            "sticky",
+
+          top: 0,
+
+          zIndex: 5,
         }}
       >
         💬 LIVE CHAT
@@ -205,16 +222,41 @@ export default function LiveChat() {
           flexDirection:
             "column",
 
-          gap: "10px",
+          gap: "12px",
+
+          minHeight:
+            isMobile
+              ? "300px"
+              : "500px",
         }}
       >
+        {messages.length ===
+          0 && (
+          <div
+            style={{
+              opacity: 0.5,
+
+              textAlign:
+                "center",
+
+              marginTop:
+                "20px",
+            }}
+          >
+            No messages yet
+          </div>
+        )}
+
         {messages.map(
           (msg, index) => (
             <div
-              key={index}
+              key={`${msg.timestamp}-${index}`}
               style={{
                 wordBreak:
                   "break-word",
+
+                lineHeight:
+                  1.5,
               }}
             >
               <span
@@ -262,6 +304,14 @@ export default function LiveChat() {
           display: "flex",
 
           gap: "10px",
+
+          background:
+            "#111",
+
+          position:
+            "sticky",
+
+          bottom: 0,
         }}
       >
         <input
@@ -295,7 +345,13 @@ export default function LiveChat() {
               "12px",
 
             padding:
-              "12px",
+              "14px",
+
+            outline:
+              "none",
+
+            fontSize:
+              "16px",
           }}
         />
 
@@ -317,10 +373,13 @@ export default function LiveChat() {
               "12px",
 
             padding:
-              "0 18px",
+              "0 20px",
 
             cursor:
               "pointer",
+
+            minWidth:
+              "90px",
           }}
         >
           Send
