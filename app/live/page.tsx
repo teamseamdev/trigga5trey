@@ -51,27 +51,37 @@ function StreamPublisher({
             "🔥 STARTING STREAM"
           );
 
-          const videoTracks =
-            await localParticipant.createTracks({
-              video: true,
-            });
+          const stream =
+            await navigator.mediaDevices.getUserMedia(
+              {
+                video: true,
+                audio: true,
+              }
+            );
 
-          const audioTracks =
-            await localParticipant.createTracks({
-              audio: true,
-            });
+          const videoTrack =
+            stream.getVideoTracks()[0];
 
-          for (const track of [
-            ...videoTracks,
-            ...audioTracks,
-          ]) {
+          const audioTrack =
+            stream.getAudioTracks()[0];
+
+          if (videoTrack) {
             await localParticipant.publishTrack(
-              track
+              videoTrack
             );
 
             console.log(
-              "✅ TRACK PUBLISHED:",
-              track.kind
+              "✅ VIDEO TRACK PUBLISHED"
+            );
+          }
+
+          if (audioTrack) {
+            await localParticipant.publishTrack(
+              audioTrack
+            );
+
+            console.log(
+              "✅ AUDIO TRACK PUBLISHED"
             );
           }
 
@@ -82,7 +92,7 @@ function StreamPublisher({
           );
         } catch (err) {
           console.error(
-            "❌ Publish failed:",
+            "❌ STREAM ERROR",
             err
           );
         }
