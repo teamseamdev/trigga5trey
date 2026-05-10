@@ -63,14 +63,20 @@ export default function StreamerControls({
         console.log(
           "🚀 STREAM IS LIVE"
         );
-      } catch (err) {
+      } catch (err: any) {
         console.error(
           "❌ STREAM FAILED",
           err
         );
 
+        console.log(
+          "ERROR STRING:",
+          err?.message
+        );
+
         alert(
-          "Failed to start stream."
+          err?.message ||
+            "Failed to start stream"
         );
       } finally {
         setLoading(false);
