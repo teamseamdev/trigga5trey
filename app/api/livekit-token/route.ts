@@ -73,8 +73,7 @@ export async function GET(
       canPublish:
         canPublish,
 
-      canPublishData:
-        canPublish,
+      canPublishData: true,
     });
 
     const jwt =
