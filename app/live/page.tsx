@@ -22,6 +22,8 @@ import LivePlayer from "@/components/live/LivePlayer";
 
 import StreamerControls from "@/components/live/StreamerControls";
 
+import LiveChat from "@/components/live/LiveChat";
+
 export default function LivePage() {
   const {
     data: session,
@@ -201,7 +203,7 @@ export default function LivePage() {
     >
       <div
         style={{
-          maxWidth: "1400px",
+          maxWidth: "1600px",
 
           margin: "0 auto",
 
@@ -250,9 +252,14 @@ export default function LivePage() {
 
           data-lk-theme="default"
         >
+          {/* 🔥 TOP BAR */}
+
           <div
             style={{
               padding: "20px",
+
+              borderBottom:
+                "1px solid rgba(255,255,255,0.08)",
             }}
           >
             <StreamerControls
@@ -262,7 +269,47 @@ export default function LivePage() {
             />
           </div>
 
-          <LivePlayer />
+          {/* 🔥 STREAM + CHAT */}
+
+          <div
+            style={{
+              display: "grid",
+
+              gridTemplateColumns:
+                "1fr 360px",
+
+              minHeight:
+                "75vh",
+            }}
+          >
+            {/* 🎥 STREAM */}
+
+            <div
+              style={{
+                background:
+                  "#000",
+
+                overflow:
+                  "hidden",
+              }}
+            >
+              <LivePlayer />
+            </div>
+
+            {/* 💬 CHAT */}
+
+            <div
+              style={{
+                background:
+                  "#111",
+
+                minHeight:
+                  "75vh",
+              }}
+            >
+              <LiveChat />
+            </div>
+          </div>
         </LiveKitRoom>
       </div>
     </main>
