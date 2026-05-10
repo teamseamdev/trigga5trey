@@ -204,21 +204,47 @@ export default function StreamerControls({
   const flipCamera =
     async () => {
       try {
+        const devices =
+          await navigator.mediaDevices.enumerateDevices();
+
+        const videoDevices =
+          devices.filter(
+            (d) =>
+              d.kind ===
+              "videoinput"
+          );
+
+        console.log(
+          "📷 VIDEO DEVICES:",
+          videoDevices
+        );
+
+        if (
+          videoDevices.length < 2
+        ) {
+          alert(
+            "No secondary camera found"
+          );
+
+          return;
+        }
+
         const nextFront =
           !frontCamera;
 
-        await room.localParticipant.setCameraEnabled(
-          false
+        const targetDevice =
+          nextFront
+            ? videoDevices[0]
+            : videoDevices[1];
+
+        console.log(
+          "🔄 SWITCHING CAMERA:",
+          targetDevice
         );
 
-        await room.localParticipant.setCameraEnabled(
-          true,
-          {
-            facingMode:
-              nextFront
-                ? "user"
-                : "environment",
-          }
+        await room.switchActiveDevice(
+          "videoinput",
+          targetDevice.deviceId
         );
 
         setFrontCamera(
@@ -335,7 +361,7 @@ export default function StreamerControls({
               : "📷 CAMERA OFF"}
           </button>
 
-          {/* 🔄 FLIP */}
+          {/* 🔄 FLIP CAMERA */}
 
           <button
             onClick={
