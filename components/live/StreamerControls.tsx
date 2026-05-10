@@ -33,13 +33,27 @@ export default function StreamerControls({
 
   const startStream =
     async () => {
-      if (!canStream) return;
+      if (!canStream) {
+        alert(
+          "You do not have streamer permissions."
+        );
+
+        return;
+      }
 
       try {
         setLoading(true);
 
         console.log(
-          "🔥 REQUESTING MEDIA"
+          "🔥 STARTING STREAM"
+        );
+
+        await localParticipant.setMicrophoneEnabled(
+          true
+        );
+
+        console.log(
+          "✅ MIC ENABLED"
         );
 
         await localParticipant.setCameraEnabled(
@@ -50,18 +64,10 @@ export default function StreamerControls({
           "✅ CAMERA ENABLED"
         );
 
-        await localParticipant.setMicrophoneEnabled(
-          true
-        );
-
-        console.log(
-          "✅ MICROPHONE ENABLED"
-        );
-
         setLive(true);
 
         console.log(
-          "🚀 STREAM IS LIVE"
+          "🚀 STREAM LIVE"
         );
       } catch (err: any) {
         console.error(
@@ -70,7 +76,7 @@ export default function StreamerControls({
         );
 
         console.log(
-          "ERROR STRING:",
+          "ERROR:",
           err?.message
         );
 
@@ -91,7 +97,7 @@ export default function StreamerControls({
     <button
       onClick={startStream}
       disabled={
-        live || loading
+        loading || live
       }
       style={{
         padding:
@@ -103,8 +109,8 @@ export default function StreamerControls({
         border: "none",
 
         background: live
-          ? "linear-gradient(135deg, #18c964 0%, #43e97b 100%)"
-          : "linear-gradient(135deg, #ff2d2d 0%, #ff5a5a 100%)",
+          ? "#18c964"
+          : "#ff2d2d",
 
         color: "#fff",
 
@@ -113,9 +119,6 @@ export default function StreamerControls({
         fontSize: "1rem",
 
         cursor: "pointer",
-
-        opacity:
-          loading ? 0.7 : 1,
       }}
     >
       {loading

@@ -30,11 +30,37 @@ export default function LivePage() {
   const [loading, setLoading] =
     useState(true);
 
+  /* 🔥 STREAMER CHECK */
+
   const canStream =
     isStreamer(session?.user);
 
+  console.log(
+    "FULL SESSION:",
+    session
+  );
+
+  console.log(
+    "USER:",
+    session?.user
+  );
+
+  console.log(
+    "ROLES:",
+    (session?.user as any)?.roles
+  );
+
+  console.log(
+    "CAN STREAM:",
+    canStream
+  );
+
+  /* 🔥 ROOM */
+
   const roomName =
     "main-stream";
+
+  /* 🔥 IDENTITY */
 
   const identity = useMemo(() => {
     if (
@@ -53,9 +79,28 @@ export default function LivePage() {
     )}`;
   }, [session, canStream]);
 
+  console.log(
+    "IDENTITY:",
+    identity
+  );
+
+  console.log(
+    "ROOM:",
+    roomName
+  );
+
+  console.log(
+    "CAN PUBLISH:",
+    canStream
+  );
+
+  /* 🔥 LIVEKIT URL */
+
   const serverUrl =
     process.env
       .NEXT_PUBLIC_LIVEKIT_URL!;
+
+  /* 🔥 TOKEN FETCH */
 
   useEffect(() => {
     const fetchToken =
@@ -64,13 +109,6 @@ export default function LivePage() {
           console.log(
             "🔑 FETCHING TOKEN"
           );
-
-          console.log({
-            identity,
-            roomName,
-            canPublish:
-              canStream,
-          });
 
           const res = await fetch(
             `/api/livekit-token?room=${roomName}&identity=${identity}&canPublish=${canStream}`
@@ -81,6 +119,11 @@ export default function LivePage() {
 
           console.log(
             "✅ TOKEN READY"
+          );
+
+          console.log(
+            "TOKEN RESPONSE:",
+            data
           );
 
           setToken(data.token);
@@ -94,12 +137,16 @@ export default function LivePage() {
         }
       };
 
+    if (!identity) return;
+
     fetchToken();
   }, [
     identity,
     roomName,
     canStream,
   ]);
+
+  /* 🔥 LOADING */
 
   if (loading) {
     return (
@@ -110,6 +157,8 @@ export default function LivePage() {
       </main>
     );
   }
+
+  /* 🔥 FAILED */
 
   if (!token) {
     return (
@@ -133,7 +182,7 @@ export default function LivePage() {
         padding: "20px",
       }}
     >
-      {/* HEADER */}
+      {/* 🔥 HEADER */}
 
       <div
         style={{
@@ -177,7 +226,7 @@ export default function LivePage() {
         </div>
       </div>
 
-      {/* LIVEKIT */}
+      {/* 🔥 PLAYER */}
 
       <div
         style={{
@@ -205,13 +254,8 @@ export default function LivePage() {
 
           connect={true}
 
-          audio={
-            canStream
-          }
-
-          video={
-            canStream
-          }
+          audio={false}
+video={false}
 
           options={{
             adaptiveStream: true,
@@ -233,7 +277,7 @@ export default function LivePage() {
 
           data-lk-theme="default"
         >
-          {/* STREAMER BUTTONS */}
+          {/* 🔥 STREAMER BUTTON */}
 
           <div
             style={{
@@ -247,7 +291,7 @@ export default function LivePage() {
             />
           </div>
 
-          {/* LIVE PLAYER */}
+          {/* 🔥 LIVE PLAYER */}
 
           <LivePlayer />
         </LiveKitRoom>

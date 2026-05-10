@@ -23,13 +23,12 @@ const handler = NextAuth({
         process.env
           .DISCORD_CLIENT_SECRET!,
 
-      authorization:
-        {
-          params: {
-            scope:
-              "identify guilds guilds.members.read",
-          },
+      authorization: {
+        params: {
+          scope:
+            "identify guilds guilds.members.read",
         },
+      },
     }),
   ],
 
@@ -46,8 +45,14 @@ const handler = NextAuth({
       account,
       profile,
     }) {
-      /* 🔥 KEEP EXISTING TOKEN */
+      /* 🔥 KEEP EXISTING JWT DATA */
       if (!account) {
+        token.roles =
+          token.roles || [];
+
+        token.isAdmin =
+          token.isAdmin || false;
+
         return token;
       }
 
@@ -72,7 +77,7 @@ const handler = NextAuth({
 
       token.isAdmin = false;
 
-      /* 🔥 FETCH MEMBER */
+      /* 🔥 FETCH DISCORD MEMBER */
       try {
         console.log(
           "🔥 Fetching Discord member..."
