@@ -36,33 +36,64 @@ function StreamPublisher({
     localParticipant,
   } = useLocalParticipant();
 
+  const [started, setStarted] =
+    useState(false);
+
   useEffect(() => {
     const start =
       async () => {
         if (!enabled) return;
 
+        if (started) return;
+
         try {
-          await localParticipant.setCameraEnabled(
-            true
+          console.log(
+            "🔥 STARTING STREAM"
           );
 
-          await localParticipant.setMicrophoneEnabled(
-            true
-          );
+          const videoTracks =
+            await localParticipant.createTracks({
+              video: true,
+            });
+
+          const audioTracks =
+            await localParticipant.createTracks({
+              audio: true,
+            });
+
+          for (const track of [
+            ...videoTracks,
+            ...audioTracks,
+          ]) {
+            await localParticipant.publishTrack(
+              track
+            );
+
+            console.log(
+              "✅ TRACK PUBLISHED:",
+              track.kind
+            );
+          }
+
+          setStarted(true);
 
           console.log(
-            "🔥 Publishing tracks"
+            "🚀 STREAM LIVE"
           );
         } catch (err) {
           console.error(
-            "Publish failed:",
+            "❌ Publish failed:",
             err
           );
         }
       };
 
     start();
-  }, [enabled, localParticipant]);
+  }, [
+    enabled,
+    localParticipant,
+    started,
+  ]);
 
   return null;
 }
@@ -78,6 +109,11 @@ function StreamView() {
       withPlaceholder: false,
     },
   ]);
+
+  console.log(
+    "🎥 TRACKS:",
+    tracks
+  );
 
   const streamerTrack =
     tracks.find((track: any) =>
@@ -183,12 +219,27 @@ export default function LivePage() {
     const fetchToken =
       async () => {
         try {
+          console.log(
+            "🔑 FETCHING TOKEN"
+          );
+
+          console.log({
+            room,
+            identity,
+            canPublish:
+              canStream,
+          });
+
           const res = await fetch(
-            `/api/livekit-token?room=${room}&identity=${identity}`
+            `/api/livekit-token?room=${room}&identity=${identity}&canPublish=${canStream}`
           );
 
           const data =
             await res.json();
+
+          console.log(
+            "✅ TOKEN RECEIVED"
+          );
 
           setToken(data.token);
         } catch (err) {
@@ -202,7 +253,7 @@ export default function LivePage() {
       };
 
     fetchToken();
-  }, [identity]);
+  }, [identity, canStream]);
 
   /* 🔥 ENABLE CAMERA + MIC */
 
@@ -216,6 +267,10 @@ export default function LivePage() {
             video: true,
             audio: true,
           }
+        );
+
+        console.log(
+          "🎤 CAMERA/MIC GRANTED"
         );
 
         setPermissionsGranted(
@@ -379,6 +434,10 @@ export default function LivePage() {
             connect={true}
 
             options={{
+              adaptiveStream: true,
+
+              dynacast: true,
+
               videoCaptureDefaults:
                 {
                   resolution:
@@ -388,8 +447,6 @@ export default function LivePage() {
                     },
                 },
             }}
-
-            /* 🔥 ONLY STREAMERS CAN PUBLISH */
 
             audio={
               canStream &&
@@ -405,6 +462,7 @@ export default function LivePage() {
           >
             <>
               {/* 🔥 PUBLISH TRACKS */}
+
               <StreamPublisher
                 enabled={
                   canStream &&
@@ -412,10 +470,12 @@ export default function LivePage() {
                 }
               />
 
-              {/* 🔥 STREAM ONLY */}
+              {/* 🔥 STREAM VIEW */}
+
               <StreamView />
 
               {/* 🔥 ONLY STREAMERS SEE CONTROLS */}
+
               {canStream &&
                 permissionsGranted && (
                   <ControlBar />

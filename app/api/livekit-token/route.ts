@@ -1,95 +1,63 @@
+import { AccessToken } from "livekit-server-sdk";
 import { NextResponse } from "next/server";
 
-import {
-  AccessToken,
-} from "livekit-server-sdk";
-
-export async function GET(
-  req: Request
-) {
+export async function GET(req: Request) {
   try {
-    const { searchParams } =
-      new URL(req.url);
+    const { searchParams } = new URL(req.url);
 
-    const room =
-      searchParams.get("room");
-
-    const identity =
-      searchParams.get(
-        "identity"
-      );
+    const room = searchParams.get("room");
+    const identity = searchParams.get("identity");
+    const canPublish =
+      searchParams.get("canPublish") === "true";
 
     if (!room || !identity) {
       return NextResponse.json(
         {
-          error:
-            "Missing room or identity",
+          error: "Missing room or identity",
         },
-        { status: 400 }
-      );
-    }
-
-    const apiKey =
-      process.env
-        .LIVEKIT_API_KEY;
-
-    const apiSecret =
-      process.env
-        .LIVEKIT_API_SECRET;
-
-    if (
-      !apiKey ||
-      !apiSecret
-    ) {
-      return NextResponse.json(
         {
-          error:
-            "Missing LiveKit env vars",
-        },
-        { status: 500 }
-      );
-    }
-
-    /* 🔥 CREATE TOKEN */
-    const at =
-      new AccessToken(
-        apiKey,
-        apiSecret,
-        {
-          identity,
+          status: 400,
         }
       );
+    }
 
-    /* 🔥 ROOM GRANTS */
-    at.addGrant({
+    console.log("LIVEKIT TOKEN REQUEST");
+    console.log({
+      room,
+      identity,
+      canPublish,
+    });
+
+    const token = new AccessToken(
+      process.env.LIVEKIT_API_KEY!,
+      process.env.LIVEKIT_API_SECRET!,
+      {
+        identity,
+      }
+    );
+
+    token.addGrant({
       roomJoin: true,
       room,
-
-      canPublish: true,
+      canPublish,
       canSubscribe: true,
-
-      canPublishData: true,
     });
 
-    /* 🔥 JWT */
-    const token =
-      await at.toJwt();
+    const jwt = await token.toJwt();
 
     return NextResponse.json({
-      token,
+      token: jwt,
     });
   } catch (err) {
-    console.error(
-      "LIVEKIT TOKEN ERROR:",
-      err
-    );
+    console.error("TOKEN ERROR", err);
 
     return NextResponse.json(
       {
-        error:
-          "Failed to generate token",
+        error: "Failed to create token",
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }
