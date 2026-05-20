@@ -14,6 +14,7 @@ import Navbar from "@/components/Navbar";
 import InstallButton from "@/components/InstallButton";
 
 import SessionWrapper from "@/components/SessionWrapper";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable:
@@ -148,6 +149,7 @@ export default function RootLayout({
             <InstallButton />
           </div>
         </SessionWrapper>
+        <Analytics />
       </body>
     </html>
   );
